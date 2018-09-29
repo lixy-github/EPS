@@ -15,7 +15,7 @@ export default new Router({
       component: Login
     },
     {
-      path: '/Index', // 主页
+      path: '/index', // 业务
       component: PublicTemplate,
       children: [
         {

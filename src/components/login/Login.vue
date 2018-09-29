@@ -1,5 +1,6 @@
 <template>
     <div class="login-bg">
+        <!-- 用户登录 -->
         <Card :bordered="false">
             <div class="login-title">用户登录</div>
             <Form ref="formInline" :model="formInline" :rules="ruleInline" class="login-box">
@@ -17,10 +18,16 @@
                     <Checkbox>记住密码</Checkbox>
                 </div>
                 <FormItem>
-                    <Button type="primary" long size="large" @click="handleSubmit()">登录</Button>
+                    <Button type="primary" long size="large" @click="loginSubmit()">登录</Button>
                 </FormItem>
             </Form>
+            <div class="form-other clearfix">
+                <span class="lt">忘记密码</span>
+                <span class="rt">新用户注册</span>
+            </div>
         </Card>
+
+        <!-- 用户注册 -->
     </div>
 </template>
 <script>
@@ -33,13 +40,18 @@ export default {
             },
             ruleInline: {
                 user: [
-                    { required: true, message: 'Please fill in the user name', trigger: 'blur' }
+                    { required: true, message: '请输入正确的用户名', trigger: 'blur' }
                 ],
                 password: [
-                    { required: true, message: 'Please fill in the password.', trigger: 'blur' },
-                    { type: 'string', min: 6, message: 'The password length cannot be less than 6 bits', trigger: 'blur' }
+                    { required: true, message: '请输入密码', trigger: 'blur' },
+                    { type: 'string', min: 6, message: '请输入正确的密码', trigger: 'blur' }
                 ]
             }
+        }
+    },
+    methods: {
+        loginSubmit(){
+            this.$router.push("/index/Index");
         }
     }
 }
@@ -54,11 +66,12 @@ export default {
 }
 .login-bg .ivu-card{
     position: absolute;
-    width: 430px;
+    width: 400px;
     height: 320px;
+    padding: 0 20px;
     top: 50%;
     left: 50%;
-    margin-left: -215px;
+    margin-left: -210px;
     margin-top: -160px;
 }
 .login-bg .login-title{
@@ -66,12 +79,20 @@ export default {
     font-size: 17px;
     color: #333;
     font-weight: 500;
+    margin-top: 5px;
 }
 .login-bg .login-box{
-    margin-top: 20px;
+    margin-top: 30px;
 }
 .login-bg .remeber-pw{
     text-align: right;
-    margin: -18px 0 10px 0;
+    margin: -10px 0 10px 0;
+}
+.login-bg .form-other span{
+    font-size: 12px;
+    cursor: pointer;
+}
+.login-bg .form-other span:hover {
+    color: #f1390b;
 }
 </style>

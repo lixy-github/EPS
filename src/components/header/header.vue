@@ -37,11 +37,13 @@
                 mode="horizontal" 
                 theme="light" 
                 :active-name="activeName"
+                @on-select="jump"
+                ref="side_head"
                 class="rt">
 
                 <template v-for="menu in menuList">
-                    <MenuItem v-if="!menu.children" :name="menu.path" :key="menu.id">
-                        <i :class="menu.icon"></i>
+                    <MenuItem :name="menu.path" v-if="!menu.children"  :key="menu.id">
+                        <i :class="menu.icon" :key="menu.id"></i>
                         <span class="layout-text" :key="menu.id">{{menu.title}}</span>
                     </MenuItem>
                     <Submenu v-if="menu.children && menu.children.length>=1" :name="menu.path" :key="menu.id">
@@ -62,17 +64,34 @@
 </template>
 <script>
 export default {
-    props: {
-        activeName: String
-    },
+    
     data () {
         return {
             menuList: []
         }
     },
+    props: {
+        activeName: {
+            type: String
+        }
+    },
+    methods: {
+        jump(name) {
+            this.$router.push(name)
+        }
+    },
     mounted() {
         this.axios.get("../../../static/headerData/header.json").then(res=>{
             this.menuList = res.data;
+        })
+        console.log(this.activeName)
+    },
+    updated() {
+        this.$nextTick(() => {
+            if(this.$refs.side_head){
+                this.$refs.side_head.updateOpened();
+                this.$refs.side_head.updateActiveName();
+            }
         })
     }
 }

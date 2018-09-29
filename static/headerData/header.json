@@ -2,7 +2,7 @@
     {
         "title": "业务",
         "icon": "fa fa-tasks",
-        "path": "/Index"
+        "path": "/index/Index"
     },
     {
         "title": "生产",

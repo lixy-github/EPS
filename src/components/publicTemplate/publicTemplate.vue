@@ -35,7 +35,7 @@
                     </Menu>
                 </Sider> -->
                 <Layout>
-                    <Content :style="{padding: '24px', minHeight: '280px', background: '#fff'}">
+                    <Content :style="{padding: '20px 20px 0 20px', minHeight: '280px', background: '#fff'}">
                         <router-view></router-view>
                     </Content>
                 </Layout>
@@ -56,8 +56,7 @@ export default {
     },
     computed: {
         activeName(){
-            // return this.$route.path
-            return "/Index"
+            return this.$route.path;
         }
     }
 }
