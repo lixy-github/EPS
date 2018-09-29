@@ -84,7 +84,6 @@ export default {
         this.axios.get("../../../static/headerData/header.json").then(res=>{
             this.menuList = res.data;
         })
-        console.log(this.activeName)
     },
     updated() {
         this.$nextTick(() => {
