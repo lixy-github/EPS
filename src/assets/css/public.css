@@ -1,0 +1,23 @@
+html, 
+body,
+#app
+{
+    height: 100%;
+}
+.clearfix {
+    *zoom: 1;
+}
+.clearfix:after {
+    visibility: hidden;
+    content: "";
+    display: block;
+    clear: both;
+    height: 0;
+    font-size: 0;
+}
+.lt {
+    float: left;
+}
+.rt {
+    float: right;
+}
