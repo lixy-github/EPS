@@ -58,7 +58,7 @@
                         </span>
                     </div>
                     <FormItem>
-                        <Button type="primary" long size="large" @click="loginSubmit()">注册</Button>
+                        <Button type="primary" long size="large">注册</Button>
                     </FormItem>
                 </Form>
                 <div class="back-login">
@@ -98,7 +98,7 @@
                         </span>
                     </div>
                     <FormItem>
-                        <Button type="primary" long size="large" @click="loginSubmit()">注册</Button>
+                        <Button type="primary" long size="large">注册</Button>
                     </FormItem>
                 </Form>
                 <div class="back-login">
