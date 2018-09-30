@@ -14,8 +14,8 @@
                         <Icon type="ios-lock-outline" slot="prepend"></Icon>
                     </Input>
                 </FormItem>
-                <div class="remeber-pw">
-                    <Checkbox>记住密码</Checkbox>
+                <div class="remember-pwd">
+                    <Checkbox v-model="loginForm.rememberPwd">记住密码</Checkbox>
                 </div>
                 <FormItem>
                     <Button type="primary" long size="large" @click="loginSubmit()">登录</Button>
@@ -39,7 +39,7 @@
                         <Input type="text" v-model="registerPhone.phoneNumber" placeholder="请输入手机号"/>
                     </FormItem>
                     <FormItem prop="phonePwd">
-                        <Input type="password" v-model="registerPhone.phonePwd" placeholder="密码（6-16个字符；字符或数字）"/>
+                        <Input type="password" v-model="registerPhone.phonePwd" placeholder="密码（6-16个字符；英文或数字）"/>
                     </FormItem>
                     <FormItem prop="confirmPwd">
                         <Input type="password" v-model="registerPhone.confirmPwd" placeholder="请再次输入密码"/>
@@ -50,8 +50,8 @@
                     <FormItem prop="phoneCode">
                         <Input type="text" v-model="registerPhone.phoneCode" placeholder="手机动态码"/>
                     </FormItem>
-                    <div class="remeber-pw">
-                        <Checkbox></Checkbox>
+                    <div class="remember-pwd">
+                        <Checkbox v-model="registerPhone.agreement"></Checkbox>
                         <span style="font-size:12px;">
                             阅读并同意易品速的
                             <span>「服务协议」</span>
@@ -79,7 +79,7 @@
                         <Input type="text" v-model="registerEmail.emailNumber" placeholder="请输入邮箱"/>
                     </FormItem>
                     <FormItem prop="emailPwd">
-                        <Input type="password" v-model="registerEmail.emailPwd" placeholder="密码（6-16个字符；字符或数字）"/>
+                        <Input type="password" v-model="registerEmail.emailPwd" placeholder="密码（6-16个字符；英文或数字）"/>
                     </FormItem>
                     <FormItem prop="confirmPwd">
                         <Input type="password" v-model="registerEmail.confirmPwd" placeholder="请再次输入密码"/>
@@ -88,10 +88,10 @@
                         <Input type="text" v-model="registerEmail.verificationCode" placeholder="验证码"/>
                     </FormItem>
                     <FormItem prop="emailCode">
-                        <Input type="text" v-model="registerPhone.emailCode" placeholder="邮箱动态码"/>
+                        <Input type="text" v-model="registerEmail.emailCode" placeholder="邮箱动态码"/>
                     </FormItem>
-                    <div class="remeber-pw">
-                        <Checkbox></Checkbox>
+                    <div class="remember-pwd">
+                        <Checkbox v-model="registerEmail.agreement"></Checkbox>
                         <span style="font-size:12px;">
                             阅读并同意易品速的
                             <span>「服务协议」</span>
@@ -111,14 +111,68 @@
 <script>
 export default {
     data () {
+        // 验证手机号
+        const validatePhone = (rule, value, callback) => {
+            var phoneReg = /^[1][3,4,5,7,8,9][0-9]{9}$/;
+            if (!phoneReg.test(value)) {
+                callback(new Error("请输入正确的手机号"));
+            } else {
+                callback();
+            }
+        };
+        // 验证注册手机密码
+        const validatePassword = (rule, value, callback) => {
+            var pwdReg = /^[0-9a-zA-Z]{6,16}$/;
+            if(!pwdReg.test(value)) {
+                callback(new Error("密码是由6到16位数字和英文组成"));
+            } else if(this.registerPhone.confirmPwd.length>0 && value!=this.registerPhone.confirmPwd) {
+                callback(new Error("两次密码不一致"));
+            } else {
+                callback();
+            }
+        }
+        // 确认注册手机密码
+        const validateRePwd = (rule, value, callback) => {
+            if(value.length==0) {
+                callback(new Error("请再次输入密码"))
+            } else if(value!=this.registerPhone.phonePwd) {
+                callback(new Error("两次密码不一致"))
+            } else {
+                callback();
+            }
+        }
+        // 验证注册邮箱密码
+        const validateEmialPassword = (rule, value, callback) => {
+            var pwdReg = /^[0-9a-zA-Z]{6,16}$/;
+            if(!pwdReg.test(value)) {
+                callback(new Error("密码是由6到16位数字和英文组成"));
+            } else if(this.registerEmail.confirmPwd.length>0 && value!=this.registerEmail.confirmPwd) {
+                callback(new Error("两次密码不一致"));
+            } else {
+                callback();
+            }
+        }
+        // 确认注册邮箱密码
+        const validateEmailRePwd = (rule, value, callback) => {
+            if(value.length==0) {
+                callback(new Error("请再次输入密码"))
+            } else if(value!=this.registerEmail.emailPwd) {
+                callback(new Error("两次密码不一致"))
+            } else {
+                callback();
+            }
+        }
+
+
         return {
             loginForm: {
-                user: '',
-                password: ''
+                user: "",
+                password: "",
+                rememberPwd: true
             },
             ruleLogin: {
                 user: [
-                    { required: true, message: '请输入正确的用户名', trigger: 'blur' }
+                    { required: true, message: '请输入用户名', trigger: 'blur' }
                 ],
                 password: [
                     { required: true, message: '请输入密码', trigger: 'blur' },
@@ -132,19 +186,20 @@ export default {
                 phonePwd: "",
                 confirmPwd: "",
                 verificationCode: "",
-                phoneCode: ""
+                phoneCode: "",
+                agreement: false
             },
             ruleRegister: {
                 phoneNumber: [
-                    { required: true, message: '请输入正确的手机号', trigger: 'blur' }
+                    { required: true, message: '请输入手机号', trigger: 'blur' },
+                    { validator: validatePhone, trigger: "change" }
                 ],
                 phonePwd: [
                     { required: true, message: '请输入密码', trigger: 'blur' },
-                    { type: 'string', min: 6, message: '请输入正确的密码', trigger: 'blur' }
+                    { validator:validatePassword, trigger: 'change' }
                 ],
                 confirmPwd: [
-                    { required: true, message: '请输入密码', trigger: 'blur' },
-                    { type: 'string', min: 6, message: '请输入正确的密码', trigger: 'blur' }
+                    { validator:validateRePwd, trigger: ['change', 'blur'] }
                 ],
                 verificationCode: [
                     { required: true, message: '请输入验证码', trigger: 'blur' }
@@ -158,19 +213,20 @@ export default {
                 emailPwd: "",
                 confirmPwd: "",
                 verificationCode: "",
-                emailCode: ""
+                emailCode: "",
+                agreement: false
             },
             ruleRegisterEmail: {
                 emailNumber: [
-                    { required: true, message: '请输入正确的邮箱', trigger: 'blur' }
+                    { required: true, message: '请输入邮箱', trigger: 'blur' },
+                    { type: 'email', message: '请输入正确的邮箱', trigger: 'change' }
                 ],
                 emailPwd: [
                     { required: true, message: '请输入密码', trigger: 'blur' },
-                    { type: 'string', min: 6, message: '请输入正确的密码', trigger: 'blur' }
+                    { validator:validateEmialPassword, trigger: 'change' }
                 ],
                 confirmPwd: [
-                    { required: true, message: '请输入密码', trigger: 'blur' },
-                    { type: 'string', min: 6, message: '请输入正确的密码', trigger: 'blur' }
+                    { validator:validateEmailRePwd, trigger: ['change', 'blur'] }
                 ],
                 verificationCode: [
                     { required: true, message: '请输入验证码', trigger: 'blur' }
@@ -226,7 +282,7 @@ export default {
 .login-bg .form-box {
     margin-top: 30px;
 }
-.login-bg .remeber-pw {
+.login-bg .remember-pwd {
     text-align: right;
     margin: -10px 0 10px 0;
 }
