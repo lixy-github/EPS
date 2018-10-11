@@ -81,7 +81,7 @@ export default {
         }
     },
     mounted() {
-        this.axios.get("../../../static/headerData/header.json").then(res=>{
+        this.axios.get(process.env.API_HOST+"static/headerData/header.json").then(res=>{
             this.menuList = res.data;
         })
     },

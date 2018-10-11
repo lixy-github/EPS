@@ -62,17 +62,17 @@ export default {
 }
 </script>
 <style>
-.ivu-menu-light {
+.ivu-layout .ivu-menu-light {
     background: transparent;
 }
-.ivu-layout-header {
+.ivu-layout .ivu-layout-header {
     height: 70px;
     background: #fff;
     padding: 5px 20px 0 30px;
     border-bottom: 1px solid #dcdee2;
     z-index: 998;
 }
-.ivu-menu-horizontal {
+.ivu-layout .ivu-menu-horizontal {
     height: 65px;
 }
 </style>
