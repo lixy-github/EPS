@@ -1,4 +1,4 @@
-[
+export default [
     {
         "title": "业务",
         "icon": "fa fa-tasks",

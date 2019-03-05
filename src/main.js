@@ -9,6 +9,7 @@ import 'iview/dist/styles/iview.css'
 import Axios from 'axios'
 import '../src/assets/css/public.css'
 import App from './App'
+import $ from 'jquery'
 
 Vue.config.productionTip = false
 

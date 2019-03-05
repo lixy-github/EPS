@@ -3,7 +3,6 @@
         <div class="header clearfix">
             <!-- 左侧 -->
             <div class="header-left lt">
-                <div class="logo"></div>
                 <span class="head-title">易品速物联网平台</span>
                 <div class="select-dropdown">
                     <Dropdown>
@@ -31,81 +30,20 @@
                 <span class="btn-icon fa fa-cog"></span>
                 <span class="btn-icon fa fa-power-off"></span>
             </div>
-
-            <!-- 导航菜单 -->
-            <Menu 
-                mode="horizontal" 
-                theme="light" 
-                :active-name="activeName"
-                @on-select="jump"
-                ref="side_head"
-                class="rt">
-
-                <template v-for="menu in menuList">
-                    <MenuItem :name="menu.path" v-if="!menu.children"  :key="menu.id">
-                        <i :class="menu.icon" :key="menu.id"></i>
-                        <span class="layout-text" :key="menu.id">{{menu.title}}</span>
-                    </MenuItem>
-                    <Submenu v-if="menu.children && menu.children.length>=1" :name="menu.path" :key="menu.id">
-                        <template slot="title">
-                            <i :class="menu.icon"></i>
-                            <span class="layout-text">{{ menu.title }}</span>
-                        </template>
-                        <template v-for="child in menu.children">
-                            <MenuItem :name="child.path" :key="child.id">
-                                <span class="layout-text" :key="child.id">{{ child.name }}</span>
-                            </MenuItem>
-                        </template>
-                    </Submenu>
-                </template>
-            </Menu>
         </div>
     </div>
 </template>
 <script>
 export default {
-    
     data () {
         return {
-            menuList: []
         }
     },
-    props: {
-        activeName: {
-            type: String
-        }
-    },
-    methods: {
-        jump(name) {
-            this.$router.push(name)
-        }
-    },
-    mounted() {
-        this.axios.get(process.env.API_HOST+"static/headerData/header.json").then(res=>{
-            this.menuList = res.data;
-        })
-    },
-    updated() {
-        this.$nextTick(() => {
-            if(this.$refs.side_head){
-                this.$refs.side_head.updateOpened();
-                this.$refs.side_head.updateActiveName();
-            }
-        })
-    }
 }
 </script>
 <style>
 .header .ivu-menu-horizontal.ivu-menu-light:after {
     display: none;
-}
-.header-left .logo {
-    display: inline-block;
-    margin-top: 8px;
-    width: 60px;
-    height: 44px;
-    background: url("../../../static/img/logo.png") no-repeat;
-    background-size: 70% 100%;
 }
 .header-left .head-title {
     display: inline-block;
@@ -114,7 +52,7 @@ export default {
     vertical-align: top;
     color: #333;
     font-size: 18px;
-    margin: -5px 40px 0 -10px;
+    margin: -5px 40px 0 8px;
 }
 .select-dropdown {
     display: inline-block;
