@@ -16,6 +16,7 @@
     "axios": "^0.18.0",
     "font-awesome": "^4.7.0",
     "iview": "^3.2.2",
+    "jquery": "^3.3.1",
     "less": "^3.8.1",
     "less-loader": "^4.1.0",
     "style-loader": "^0.23.0",
