@@ -7,7 +7,7 @@ export default [
     {
         "title": "生产",
         "icon": "fa fa-cubes",
-        "path": "2",
+        "path": "/production",
         "children": [
             {
                 "name": "外发订单",
@@ -20,6 +20,10 @@ export default [
             {
                 "name": "产能监测",
                 "path": "2_3"
+            },
+            {
+                "name": "生成任务",
+                "path": "/production/productionTask"
             }
         ]
     },

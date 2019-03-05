@@ -4,6 +4,7 @@ import Router from 'vue-router'
 const PublicTemplate = ()=> import("@/components/publicTemplate/publicTemplate")
 const Login = ()=> import("@/view/login/Login")
 const Index = ()=> import("@/components/Index")
+const productionTask = ()=> import("@/view/production/productionTask")
 
 Vue.use(Router)
 
@@ -26,8 +27,18 @@ export default new Router({
       ]
     },
     {
-      path: "*",
-      redirect: "/Login"
-    }
+      path: "/production", // 生产任务
+      component: PublicTemplate,
+      children: [
+        {
+          path: "productionTask", 
+          component: productionTask
+        }
+      ]
+    },
+    // {
+    //   path: "*",
+    //   redirect: "/Login"
+    // }
   ]
 })
