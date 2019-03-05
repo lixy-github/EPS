@@ -23,12 +23,12 @@
 
             <template v-for="menu in menu_list">
                 <MenuItem v-if="!menu.children" :name="menu.path" :key="menu.id">
-                    <i :class="menu.icon" :key="menu.id"></i>
+                    <Icon :type="menu.icon" :key="menu.id"></Icon>
                     <span class="layout-text" :key="menu.id">{{ menu.title }}</span>
                 </MenuItem>
                 <Submenu v-if="menu.children && menu.children.length" :name="menu.path" :key="menu.id">
                     <template slot="title">
-                        <i :class="menu.icon" :key="menu.id" calss="top-icon"></i>
+                        <Icon :type="menu.icon" :key="menu.id" calss="top-icon"></Icon>
                         <span class="layout-text" :key="menu.id">{{ menu.title }}</span>
                     </template>
                     <template v-for="child in menu.children">
@@ -60,14 +60,14 @@
             <template v-for="menu in menu_list">
                 <Tooltip v-if="!menu.children" :key="menu.id" transfer placement="right">
                     <router-link :to="menu.path">
-                        <i :class="menu.icon" :key="menu.id"></i>
+                        <Icon :type="menu.icon" :key="menu.id" size="23"></Icon>
                     </router-link>
                     <div slot="content">{{ menu.title }}</div>
                 </Tooltip>    
                 <template v-if="menu.children && menu.children.length">
                     <Dropdown class="dropdown-list" @on-click="jump" transfer placement="right" trigger="click" :key="menu.id">
                         <a href="javascript:void(0)">
-                            <i :class="menu.icon"></i>
+                            <Icon :type="menu.icon" size="23"></Icon>
                         </a>
                         <DropdownMenu slot="list" v-for="child in menu.children" :key="child.id">
                             <DropdownItem :selected="activeName == child.path ? true :false" :name="child.path">{{ child.name }} </DropdownItem>
@@ -75,7 +75,7 @@
                             <Dropdown v-if="child.children && child.children.length" :key="child.id" transfer placement="right-start" class="remove-brother">
                                 <DropdownItem :selected="activeName.substr(0, activeName.lastIndexOf('/')) == child.path ? true : false">
                                     {{ child.title }}
-                                    <Icon type="ios-arrow-forward"></Icon>
+                                    <Icon type="ios-arrow-forward" size="23"></Icon>
                                 </DropdownItem>
                                 <DropdownMenu slot="list" v-for="son in child.children" :key="son.id">
                                     <DropdownItem :selected="activeName == son.path ? true : false" :name="son.path">{{ son.name }}</DropdownItem>
@@ -175,5 +175,15 @@ export default {
 .dropdown-list .ivu-icon,
 .ivu-tooltip .ivu-icon {
     color: #fff;
+}
+#app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu), 
+#app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu):hover, 
+#app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title-active:not(.ivu-menu-submenu), 
+#app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title-active:not(.ivu-menu-submenu):hover,
+#app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-opened .ivu-menu-submenu-title,
+#app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-opened,
+#app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-item:hover, 
+#app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title:hover {
+    background: transparent;
 }
 </style>
