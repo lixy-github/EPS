@@ -1,12 +1,12 @@
 export default [
     {
         "title": "业务",
-        "icon": "fa fa-tasks",
+        "icon": "ios-paper",
         "path": "/index/Index"
     },
     {
         "title": "生产",
-        "icon": "fa fa-cubes",
+        "icon": "ios-cube",
         "path": "/production",
         "children": [
             {
@@ -29,7 +29,7 @@ export default [
     },
     {
         "title": "数据",
-        "icon": "fa fa-database",
+        "icon": "ios-pie",
         "path": "3",
         "children": [
             {
@@ -48,7 +48,7 @@ export default [
     },
     {
         "title": "管理",
-        "icon": "fa fa-gavel",
+        "icon": "ios-settings",
         "path": "4",
         "children": [
             {
