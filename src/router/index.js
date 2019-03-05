@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-const PublicTemplate = ()=> import("../components/publicTemplate/publicTemplate.vue")
-const Login = ()=> import("../components/login/Login.vue")
-const Index = ()=> import("../components/Index")
+const PublicTemplate = ()=> import("@/components/publicTemplate/publicTemplate")
+const Login = ()=> import("@/view/login/Login")
+const Index = ()=> import("@/components/Index")
 
 Vue.use(Router)
 
