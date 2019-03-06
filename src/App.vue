@@ -11,10 +11,3 @@ export default {
 }
 </script>
 
-<style>
-  .pagination{
-    margin: 20px 0 20px 0;
-    text-align:right;
-    font-size:12px;
-  }
-</style>

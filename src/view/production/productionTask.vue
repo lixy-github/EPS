@@ -135,19 +135,20 @@
         </Modal>
         <!-- 显示的表格 -->
         <Table border :columns="columns12" :data="data6">
-            <template slot-scope="{ row, index }" slot="name">
-                <Input type="text" v-model="editName" v-if="editIndex === index" />
-                <span v-else>{{ row.name }}</span>
-            </template>
-            <template slot-scope="{ row, index }" slot="action">
-                <div v-if="editIndex === index">
-                    <Button @click="handleSave(index)">保存</Button>
-                    <Button @click="editIndex = -1">取消</Button>
-                </div>
-                <div v-else>
-                    <Button @click="handleEdit(row, index)">操作</Button>
-                </div>
-            </template>
+            <Row>
+            <Col span="8">
+                <span class="expand-key">Favorite book: </span>
+                <span class="expand-value">《{{ row.book }}》</span>
+            </Col>
+            <Col span="8">
+                <span class="expand-key">Favorite movie: </span>
+                <span class="expand-value">{{ row.movie }}</span>
+            </Col>
+            <Col span="8">
+                <span class="expand-key">Favorite music: </span>
+                <span class="expand-value">{{ row.music }}</span>
+            </Col>
+        </Row>
 
             <template slot-scope="{ row }" slot="name">
                 <strong>{{ row.name }}</strong>
@@ -159,7 +160,7 @@
             </template>
         </Table>
          <!-- 分页 -->
-        <div class="pagination">
+        <!-- <div class="pagination">
             <Page 
                 :total="total" 
                 size="small" 
@@ -169,7 +170,7 @@
                 :current="currentPage+1"
                 @on-change="changePage"
                 @on-page-size-change="handleSizeChange">
-            </Page>
+            </Page> -->
         </div>
     </div>
 </template>
@@ -177,8 +178,6 @@
     export default {
         data () {
             return {
-                editName: '',
-                editIndex: -1,
                 modal1:false,
                 editor:false,
                 editorProductionTask:{},

@@ -1,4 +1,5 @@
 <template>
+<!-- import { valid } from 'semver'; -->
     <div class="login-bg">
         <!-- 用户登录 -->
         <Card :bordered="false" v-if="!register">
@@ -35,11 +36,11 @@
             </div>
             <div class="form-box">
                 <Form ref="registerPhone" :model="registerPhone" :rules="ruleRegister">
-                    <FormItem prop="phoneNumber">
-                        <Input type="text" v-model="registerPhone.phoneNumber" placeholder="请输入手机号"/>
+                    <FormItem prop="phone">
+                        <Input type="text" v-model="registerPhone.phone" placeholder="请输入手机号"/>
                     </FormItem>
-                    <FormItem prop="phonePwd">
-                        <Input type="password" v-model="registerPhone.phonePwd" placeholder="密码（6-16个字符；英文或数字）"/>
+                    <FormItem prop="password">
+                        <Input type="password" v-model="registerPhone.password" placeholder="密码（6-16个字符；英文或数字）"/>
                     </FormItem>
                     <FormItem prop="confirmPwd">
                         <Input type="password" v-model="registerPhone.confirmPwd" placeholder="请再次输入密码"/>
@@ -58,7 +59,7 @@
                         </span>
                     </div>
                     <FormItem>
-                        <Button type="primary" long size="large" @click="loginSubmit()">注册</Button>
+                        <Button type="primary" long size="large" @click="loginSubmit(registerPhone)">注册</Button>
                     </FormItem>
                 </Form>
                 <div class="back-login">
@@ -109,6 +110,7 @@
     </div>
 </template>
 <script>
+import {register} from "../../api/login"
 export default {
     data () {
         // 验证手机号
@@ -135,7 +137,7 @@ export default {
         const validateRePwd = (rule, value, callback) => {
             if(value.length==0) {
                 callback(new Error("请再次输入密码"))
-            } else if(value!=this.registerPhone.phonePwd) {
+            } else if(value!=this.registerPhone.password) {
                 callback(new Error("两次密码不一致"))
             } else {
                 callback();
@@ -182,19 +184,19 @@ export default {
             register: false,
             email: false,
             registerPhone: {
-                phoneNumber: "",
-                phonePwd: "",
+                phone: "",
+                password: "",
                 confirmPwd: "",
                 verificationCode: "",
                 phoneCode: "",
                 agreement: false
             },
             ruleRegister: {
-                phoneNumber: [
+                phone: [
                     { required: true, message: '请输入手机号', trigger: 'blur' },
                     { validator: validatePhone, trigger: "change" }
                 ],
-                phonePwd: [
+                password: [
                     { required: true, message: '请输入密码', trigger: 'blur' },
                     { validator:validatePassword, trigger: 'change' }
                 ],
@@ -241,6 +243,13 @@ export default {
         // 登录
         loginSubmit() {
             this.$router.push("/index/Index");
+            // this.$refs['registerPhone'].validate((valid) => {
+            //     if(valid){
+            //         register(this.registerPhone).then(res=>{
+            //             console.log(res)
+            //         })
+            //     }
+            // })
         },
         // 切换到登录/注册
         toggleLoginRegister() {
