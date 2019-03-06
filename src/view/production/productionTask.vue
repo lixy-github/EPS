@@ -26,8 +26,129 @@
                 </div>
             </div>
         </div>
-       <!-- 显示的表格 -->
+       
+         <!-- 增加 -->
+        <Modal
+            v-model="modal1"
+            title="增加生产任务"
+            @on-ok="ok"
+            @on-cancel="cancel">
+            <Form ref="productionRef" :model="addProductionTask" :rules="productionRules" :label-width="80" inline>
+                <FormItem label="生产单号" prop="mo_code">
+                    <Input v-model="addProductionTask.mo_code"/>
+                </FormItem>
+                <FormItem label="客户名称" prop="custom">
+                    <Input v-model="addProductionTask.custom"/>
+                </FormItem>
+                <FormItem label="客户款号" prop="custom_code">
+                    <Input v-model="addProductionTask.custom_code"/>
+                </FormItem>
+                <FormItem label="本厂款号" prop="style_code">
+                    <Input v-model="addProductionTask.style_code"/>
+                </FormItem>
+                <FormItem label="针数" prop="pins">
+                    <Input v-model="addProductionTask.pins"/>
+                </FormItem>
+                <FormItem label="生产数量" prop="qty">
+                    <Input v-model="addProductionTask.qty"/>
+                </FormItem>
+                <FormItem label="品牌" prop="memo">
+                    <Input v-model="addProductionTask.brand"/>
+                </FormItem>
+                <FormItem label="备注说明" prop="memo">
+                    <Input v-model="addProductionTask.memo"/>
+                </FormItem>
+                 <FormItem label="颜色" prop="color">
+                    <Select v-model="addProductionTask.color">
+                        <Option v-for="item in colour" :value="item.value" :key="item.value">{{item.label}}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="尺码" prop="sizes">
+                   <Select v-model="addProductionTask.sizes">
+                       <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
+                   </Select> 
+                </FormItem>
+                <FormItem label="计量单位" prop="unit">
+                    <Select v-model="addProductionTask.unit">
+                        <Option value="piece">件</Option>
+                        <Option value="pack">包</Option>
+                    </Select>
+                </FormItem>
+            </Form>
+        </Modal>
+         <!-- 编辑 -->
+        <Modal
+            v-model="editor"
+            title="生产任务"
+            @on-ok="ok"
+            @on-cancel="cancel">
+            <Form ref="editorProductionRef" :model="editorProductionTask" :rules="productionRules" :label-width="80" inline>
+                <Steps :current="1" size="small">
+                    <Step title="发货"></Step>
+                    <Step title="横机织造"></Step>
+                    <Step title="套口键盘"></Step>
+                    <Step title="后通整理"></Step>
+                    <Step title="成品入库"></Step>
+                </Steps>
+                <br/>
+                <FormItem label="生产单号" prop="mo_code">
+                    <Input v-model="editorProductionTask.mo_code"/>
+                </FormItem>
+                <FormItem label="客户名称" prop="custom">
+                    <Input v-model="editorProductionTask.custom"/>
+                </FormItem>
+                <FormItem label="客户款号" prop="custom_code">
+                    <Input v-model="editorProductionTask.custom_code"/>
+                </FormItem>
+                <FormItem label="本厂款号" prop="style_code">
+                    <Input v-model="editorProductionTask.style_code"/>
+                </FormItem>
+                <FormItem label="针数" prop="pins">
+                    <Input v-model="editorProductionTask.pins"/>
+                </FormItem>
+                <FormItem label="生产数量" prop="qty">
+                    <Input v-model="editorProductionTask.qty"/>
+                </FormItem>
+                <FormItem label="品牌" prop="memo">
+                    <Input v-model="editorProductionTask.brand"/>
+                </FormItem>
+                <FormItem label="备注说明" prop="memo">
+                    <Input v-model="editorProductionTask.memo"/>
+                </FormItem>
+                 <FormItem label="颜色" prop="color">
+                    <Select v-model="editorProductionTask.color">
+                        <Option v-for="item in colour" :value="item.value" :key="item.value">{{item.label}}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="尺码" prop="sizes">
+                   <Select v-model="editorProductionTask.sizes">
+                       <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
+                   </Select> 
+                </FormItem>
+                <FormItem label="计量单位" prop="unit">
+                    <Select v-model="editorProductionTask.unit">
+                        <Option value="piece">件</Option>
+                        <Option value="pack">包</Option>
+                    </Select>
+                </FormItem>
+            </Form>
+        </Modal>
+        <!-- 显示的表格 -->
         <Table border :columns="columns12" :data="data6">
+            <template slot-scope="{ row, index }" slot="name">
+                <Input type="text" v-model="editName" v-if="editIndex === index" />
+                <span v-else>{{ row.name }}</span>
+            </template>
+            <template slot-scope="{ row, index }" slot="action">
+                <div v-if="editIndex === index">
+                    <Button @click="handleSave(index)">保存</Button>
+                    <Button @click="editIndex = -1">取消</Button>
+                </div>
+                <div v-else>
+                    <Button @click="handleEdit(row, index)">操作</Button>
+                </div>
+            </template>
+
             <template slot-scope="{ row }" slot="name">
                 <strong>{{ row.name }}</strong>
             </template>
@@ -37,25 +158,77 @@
                 <Button type="error" size="small" @click="remove(index)">删除</Button>
             </template>
         </Table>
-        <!-- 增加 -->
-        <Form ref="productionRef" :model="addProductionTask" :rules="productionRules">
-            <FormItem label="生产单号" prop="mo_code">
-                 <Input v-model="addProductionTask.mo_code"></Input>
-            </FormItem>
-        </Form>
+         <!-- 分页 -->
+        <div class="pagination">
+            <Page 
+                :total="total" 
+                size="small" 
+                show-elevator 
+                show-sizer 
+                show-total
+                :current="currentPage+1"
+                @on-change="changePage"
+                @on-page-size-change="handleSizeChange">
+            </Page>
+        </div>
     </div>
 </template>
 <script>
     export default {
         data () {
             return {
+                editName: '',
+                editIndex: -1,
+                modal1:false,
+                editor:false,
+                editorProductionTask:{},
                 productionRules:{
                     mo_code:[
                         {required: true, message: "内容不能为空", trigger: "change" }
-                    ]
+                    ],
+                    custom:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
+                    custom_code:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
+                    style_code:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
+                    pins:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
+                    memo:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
+                    unit:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
+                    qty:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
+                    color:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
+                    sizes:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
+                    brand:[
+                        {required: true, message: "内容不能为空", trigger: "change" }
+                    ],
                 },
                 addProductionTask:{
                     mo_code:"",
+                    custom:"",
+                    custom_code:"",
+                    style_code:"",
+                    pins:"",
+                    memo:"",
+                    qty:"",
+                    color:"",
+                    sizes:"",
+                    brand:"",
+                    unit:"piece",
                 },
                 searchFm: {
                     startTime:'',
@@ -81,44 +254,51 @@
                     },
                     {
                         title: '生产单号',
+                        key: 'mo_code',
                         align: "center",
                         ellipsis: true,
-                        key: 'address',
                         sortable: true
                     },
                     {
                         title: '款号',
+                        key: "style_code",
                         align: "center",
                         ellipsis: true,
                     },
                      {
                         title: '数量',
+                        key: "qty",
                         align: "center",
                         ellipsis: true,
                     },
                     {
                         title: '工期',
+                        key: "",
                         align: "center",
                         ellipsis: true,
                         sortable: true
                     },
                     {
                         title: '客户名称',
+                        key: "custom",
                         align: "center",
                         ellipsis: true,
                     },
                     {
                         title: '品牌',
+                        key: "brand",
                         align: "center",
                         ellipsis: true,
                     },
                      {
                         title: '工序',
+                        key: "procedure",
                         align: "center",
                         ellipsis: true,
                     },
                     {
                         title: '完成率',
+                        key: "",
                         slot: 'action',
                         width: 170,
                         align: 'center'
@@ -130,35 +310,68 @@
                         age: 18,
                         address: 'New York No. 1 Lake Park'
                     },
+                ],
+                size:[
                     {
-                        name: 'Jim Green',
-                        age: 24,
-                        address: 'London No. 1 Lake Park'
+                        value:"S",
+                        label:"S"
                     },
                     {
-                        name: 'Joe Black',
-                        age: 30,
-                        address: 'Sydney No. 1 Lake Park'
+                        value:"M",
+                        label:"M"
                     },
                     {
-                        name: 'Jon Snow',
-                        age: 26,
-                        address: 'Ottawa No. 2 Lake Park'
+                        value:"L",
+                        label:"L"
+                    },
+                    {
+                        value:"XL",
+                        label:"XL"
+                    },
+                    {
+                        value:"XXL",
+                        label:"XXL"
+                    },
+                    {
+                        value:"3XL",
+                        label:"3XL"
+                    }
+                ],
+                colour:[
+                    {
+                        value:"red",
+                        label:"红色"
+                    },
+                    {
+                        value:"navy",
+                        label:"藏青"
                     }
                 ]
             }
         },
         methods: {
             show (index) {
-                this.$Modal.info({
-                    title: 'User Info',
-                    content: `Name：${this.data6[index].name}<br>Age：${this.data6[index].age}<br>Address：${this.data6[index].address}`
-                })
+                this.editor=true
             },
             remove (index) {
-                this.data6.splice(index, 1);
+                this.$Modal.confirm({
+                    title:"删除",
+                    content:"<p>确定要删除这条记录吗？</p>",
+                   onOk: () => {
+                        this.data6.splice(index, 1)
+                        this.$Message.info('删除成功')
+                    },
+                })
             },
-            showAddRoad(){}
+            showAddRoad(){
+                this.modal1=true
+            },
+            ok () {
+                this.$Message.info('确定');
+            },
+            cancel () {
+                this.$Message.info('取消');
+            }
         }
     }
 </script>
