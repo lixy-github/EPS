@@ -28,7 +28,7 @@
                 </MenuItem>
                 <Submenu v-if="menu.children && menu.children.length" :name="menu.path" :key="menu.id">
                     <template slot="title">
-                        <Icon :type="menu.icon" :key="menu.id" calss="top-icon"></Icon>
+                        <Icon :type="menu.icon" :key="menu.id"></Icon>
                         <span class="layout-text" :key="menu.id">{{ menu.title }}</span>
                     </template>
                     <template v-for="child in menu.children">
@@ -58,12 +58,12 @@
             width="auto">
 
             <template v-for="menu in menu_list">
-                <Tooltip v-if="!menu.children" :key="menu.id" transfer placement="right">
+                <Tooltip v-if="!menu.children" :key="menu.id" transfer theme="light" placement="right">
                     <router-link :to="menu.path">
                         <Icon :type="menu.icon" :key="menu.id" size="23"></Icon>
                     </router-link>
                     <div slot="content">{{ menu.title }}</div>
-                </Tooltip>    
+                </Tooltip>
                 <template v-if="menu.children && menu.children.length">
                     <Dropdown class="dropdown-list" @on-click="jump" transfer placement="right" trigger="click" :key="menu.id">
                         <a href="javascript:void(0)">
@@ -123,6 +123,7 @@ export default {
     }
 }
 </script>
+
 <style>
 .sider-logo {
     height: 100%;
@@ -159,12 +160,6 @@ export default {
 .ivu-menu.ivu-menu-dark {
     background: #001529;
 }
-.vertical-item .top-icon{
-    display: block;
-    position:relative;
-    top: 15px;
-    font-size: 20px;
-}
 .ivu-menu .dropdown-list,
 .ivu-menu .ivu-tooltip {
     display: block;
@@ -173,8 +168,11 @@ export default {
     text-align: center;
 }
 .dropdown-list .ivu-icon,
-.ivu-tooltip .ivu-icon {
+.ivu-tooltip .ivu-icon,
+.ivu-menu-dark.ivu-menu-vertical .ivu-menu-item, 
+.ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title {
     color: #fff;
+    font-size: 13px;
 }
 #app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu), 
 #app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu):hover, 
@@ -185,5 +183,19 @@ export default {
 #app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-item:hover, 
 #app .ivu-menu-dark.ivu-menu-vertical .ivu-menu-submenu-title:hover {
     background: transparent;
+}
+.ivu-menu-submenu-title+ul.ivu-menu {
+    background: #0c212c;
+}
+.ivu-menu-submenu-title+ul.ivu-menu .layout-text{
+    font-size: 13px;
+}
+.ivu-dropdown-menu .ivu-dropdown-item-selected, 
+.ivu-dropdown-menu .ivu-dropdown-item.ivu-dropdown-item-selected:hover {
+    background: #87d068;
+    color: #fff;
+} 
+[data-transfer="true"][x-placement="right"].ivu-tooltip-popper.ivu-tooltip-light {
+    left: 62px!important;
 }
 </style>

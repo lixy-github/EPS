@@ -6,15 +6,16 @@ import router from './router'
 import 'font-awesome/css/font-awesome.min.css'
 import iView from 'iview'
 import 'iview/dist/styles/iview.css'
-import Axios from 'axios'
+import AxiosPlugin from './libs/AxiosPlugin'
 import '../src/assets/css/public.css'
 import App from './App'
 import $ from 'jquery'
+import './my-theme/index.less'
 
 Vue.config.productionTip = false
 
 Vue.use(iView)
-Vue.prototype.axios=Axios
+Vue.use(AxiosPlugin)
 
 /* eslint-disable no-new */
 new Vue({

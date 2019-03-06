@@ -10,10 +10,9 @@ Vue.use(Router)
 
 export default new Router({
   mode: "history",
-  // base: "/web/EPS/dist/",    // 打包测试
   routes: [
     {
-      path: '/Login', // 登录
+      path: '/login', // 登录
       component: Login
     },
     {
@@ -36,9 +35,9 @@ export default new Router({
         }
       ]
     },
-    // {
-    //   path: "*",
-    //   redirect: "/Login"
-    // }
+    {
+      path: "*",
+      redirect: "/login"
+    }
   ]
 })
