@@ -9,13 +9,14 @@
                                 <Option :value="company.name" v-for="company in companyList" :key="company.id" id="qy">{{ company.name }}</Option>
                             </Select>
                         </FormItem> -->
-                         <FormItem prop="startTime" label="开始时间" style="width:241px">
-                            <DatePicker type="datetime" v-model="searchFm.startTime" style="width:141px"></DatePicker>
+                         <FormItem prop="custom" label="客户名称" style="width:241px">
+                            <!-- <DatePicker type="datetime" v-model="searchFm.custom" style="width:141px"></DatePicker> -->
+                                <Input v-model="searchFm.custom"/>
                         </FormItem>
                          <!-- <FormItem prop="endTime" label="---" style="width:241px;margin-left:-8%">
                             <DatePicker type="datetime" v-model="searchFm.endTime" style="width:141px"></DatePicker>
                         </FormItem> -->
-                        <FormItem style="margin-left:-100px;">
+                        <FormItem style="margin-left:-50px;">
                             <Button type="primary" @click="searchBtn()" icon="ios-search">查询</Button>
                         </FormItem>
                     </Form>
@@ -31,20 +32,21 @@
         <Modal
             v-model="modal1"
             title="增加生产任务"
-            @on-ok="ok"
+            :loading="add"
+            @on-ok="Addok"
             @on-cancel="cancel">
             <Form ref="productionRef" :model="addProductionTask" :rules="productionRules" :label-width="80" inline>
-                <FormItem label="生产单号" prop="mo_code">
-                    <Input v-model="addProductionTask.mo_code"/>
+                <FormItem label="生产单号" prop="moCode">
+                    <Input v-model="addProductionTask.moCode"/>
                 </FormItem>
                 <FormItem label="客户名称" prop="custom">
                     <Input v-model="addProductionTask.custom"/>
                 </FormItem>
-                <FormItem label="客户款号" prop="custom_code">
-                    <Input v-model="addProductionTask.custom_code"/>
+                <FormItem label="客户款号" prop="customCode">
+                    <Input v-model="addProductionTask.customCode"/>
                 </FormItem>
-                <FormItem label="本厂款号" prop="style_code">
-                    <Input v-model="addProductionTask.style_code"/>
+                <FormItem label="本厂款号" prop="styleCode">
+                    <Input v-model="addProductionTask.styleCode"/>
                 </FormItem>
                 <FormItem label="针数" prop="pins">
                     <Input v-model="addProductionTask.pins"/>
@@ -52,7 +54,7 @@
                 <FormItem label="生产数量" prop="qty">
                     <Input v-model="addProductionTask.qty"/>
                 </FormItem>
-                <FormItem label="品牌" prop="memo">
+                <FormItem label="品牌" prop="brand">
                     <Input v-model="addProductionTask.brand"/>
                 </FormItem>
                 <FormItem label="备注说明" prop="memo">
@@ -63,8 +65,8 @@
                         <Option v-for="item in colour" :value="item.value" :key="item.value">{{item.label}}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="尺码" prop="sizes">
-                   <Select v-model="addProductionTask.sizes">
+                <FormItem label="尺码" prop="size">
+                   <Select v-model="addProductionTask.size">
                        <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
                    </Select> 
                 </FormItem>
@@ -75,11 +77,13 @@
                     </Select>
                 </FormItem>
             </Form>
+            <Spin ref="Aloadding"></Spin>
         </Modal>
 
         <!-- 编辑 -->
         <Modal
             v-model="editor"
+            :loading="ed"
             title="生产任务"
             @on-ok="ok"
             @on-cancel="cancel">
@@ -92,17 +96,17 @@
                     <Step title="成品入库"></Step>
                 </Steps>
                 <br/>
-                <FormItem label="生产单号" prop="mo_code">
-                    <Input v-model="editorProductionTask.mo_code"/>
+                <FormItem label="生产单号" prop="moCode">
+                    <Input v-model="editorProductionTask.moCode"/>
                 </FormItem>
                 <FormItem label="客户名称" prop="custom">
                     <Input v-model="editorProductionTask.custom"/>
                 </FormItem>
-                <FormItem label="客户款号" prop="custom_code">
-                    <Input v-model="editorProductionTask.custom_code"/>
+                <FormItem label="客户款号" prop="customCode">
+                    <Input v-model="editorProductionTask.customCode"/>
                 </FormItem>
-                <FormItem label="本厂款号" prop="style_code">
-                    <Input v-model="editorProductionTask.style_code"/>
+                <FormItem label="本厂款号" prop="styleCode">
+                    <Input v-model="editorProductionTask.styleCode"/>
                 </FormItem>
                 <FormItem label="针数" prop="pins">
                     <Input v-model="editorProductionTask.pins"/>
@@ -110,7 +114,7 @@
                 <FormItem label="生产数量" prop="qty">
                     <Input v-model="editorProductionTask.qty"/>
                 </FormItem>
-                <FormItem label="品牌" prop="memo">
+                <FormItem label="品牌" prop="brand">
                     <Input v-model="editorProductionTask.brand"/>
                 </FormItem>
                 <FormItem label="备注说明" prop="memo">
@@ -121,8 +125,8 @@
                         <Option v-for="item in colour" :value="item.value" :key="item.value">{{item.label}}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="尺码" prop="sizes">
-                   <Select v-model="editorProductionTask.sizes">
+                <FormItem label="尺码" prop="size">
+                   <Select v-model="editorProductionTask.size">
                        <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
                    </Select> 
                 </FormItem>
@@ -133,23 +137,28 @@
                     </Select>
                 </FormItem>
             </Form>
+            <Spin ref="Aloadding1"></Spin>
         </Modal>
 
         <!-- 显示的表格 -->
-        <Table 
+        <div>
+            <Table 
             border 
             :columns="columns" 
             :data="dataTable">
 
             <template slot-scope="{row, index}" slot="action">
                 <Button type="error" size="small">外发</Button>
-                <Button type="primary" size="small" style="margin-right: 5px" @click="show(index)">编辑</Button>
-                <Button type="error" size="small" @click="remove(index)">删除</Button>
+                <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row,index)">编辑</Button>
+                <Button type="error" size="small" @click="remove(row,index)">删除</Button>
             </template>
-        </Table>
+            </Table>
+            <Spin ref="Aloadding2"></Spin>
+        </div>
+       
         
         <!-- 分页 -->
-        <!-- <div class="pagination">
+        <div class="pagination">
             <Page 
                 :total="total" 
                 size="small" 
@@ -160,29 +169,42 @@
                 @on-change="changePage"
                 @on-page-size-change="handleSizeChange">
             </Page> 
-        </div>-->
+        </div>
     </div>
 </template>
 <script>
-import TableExpand from '../../components/tableExpand/TableExpand'
-
+import Spin from '../spin/spin'
+import TableExpand from './tableExpand/TableExpand'
+import {productionTasks,productiontasksFindall,productionTaskDelete,
+        productionTaskEdit,productionTaskFindbyid} from "../../api/production/productionTask.js"
 export default {
     data () {
         return {
+            ed:true,
+            add: true,
+            searchFm:{
+                custom:"",
+                page: 0,
+                size: 10,
+                sort: "createTime,desc"
+            },
+            currentPage:0,
+            total:0,
+            dataTable:[],
             modal1:false,
             editor:false,
             editorProductionTask:{},
             productionRules:{
-                mo_code:[
-                    {required: true, message: "内容不能为空", trigger: "change" }
+                moCode:[
+                    { required: true, message: "内容不能为空", trigger: "change" }
                 ],
                 custom:[
                     {required: true, message: "内容不能为空", trigger: "change" }
                 ],
-                custom_code:[
+                customCode:[
                     {required: true, message: "内容不能为空", trigger: "change" }
                 ],
-                style_code:[
+                styleCode:[
                     {required: true, message: "内容不能为空", trigger: "change" }
                 ],
                 pins:[
@@ -194,13 +216,13 @@ export default {
                 unit:[
                     {required: true, message: "内容不能为空", trigger: "change" }
                 ],
-                qty:[
-                    {required: true, message: "内容不能为空", trigger: "change" }
-                ],
+                // qty:[
+                //     {required: true, message: "内容不能为空", trigger: "change" }
+                // ],
                 color:[
                     {required: true, message: "内容不能为空", trigger: "change" }
                 ],
-                sizes:[
+                size:[
                     {required: true, message: "内容不能为空", trigger: "change" }
                 ],
                 brand:[
@@ -208,24 +230,17 @@ export default {
                 ],
             },
             addProductionTask:{
-                mo_code:"",
+                moCode:"",
                 custom:"",
-                custom_code:"",
-                style_code:"",
+                customCode:"",
+                styleCode:"",
                 pins:"",
                 memo:"",
-                qty:"",
+                qty:0,
                 color:"",
-                sizes:"",
+                size:"",
                 brand:"",
                 unit:"piece",
-            },
-            searchFm: {
-                startTime:'',
-                enterpriseName: "",
-                page: 0,
-                size: 10,
-                sort: "createTime,desc"
             },
             columns: [
                 {
@@ -256,14 +271,14 @@ export default {
                 },
                 {
                     title: '生产单号',
-                    key: 'mo_code',
+                    key: 'moCode',
                     align: "center",
                     ellipsis: true,
                     sortable: true
                 },
                 {
                     title: '款号',
-                    key: "style_code",
+                    key: "styleCode",
                     align: "center",
                     ellipsis: true,
                 },
@@ -306,23 +321,6 @@ export default {
                     align: 'center'
                 }
             ],
-            dataTable: [
-                {
-                    name: '11',
-                    age: 18,
-                    address: 'New York No. 1 Lake Park'
-                },
-                {
-                    name: '22',
-                    age: 18,
-                    address: 'New York No. 1 Lake Park'
-                },
-                {
-                    name: '33',
-                    age: 18,
-                    address: 'New York No. 1 Lake Park'
-                },
-            ],
             size:[
                 {
                     value:"S",
@@ -362,31 +360,106 @@ export default {
         }
     },
     components: {
-        TableExpand
+        TableExpand,
+        Spin
     },
     methods: {
-        show (index) {
-            this.editor=true
+        //搜索
+        searchBtn() {
+            this.$refs.Aloadding2.toggleSpin=true
+            productiontasksFindall(this.searchFm).then((res)=>{
+            this.dataTable = res.data.content
+            this.total = res.data.totalElements
+            this.currentPage = res.data.number
+            this.$refs.Aloadding2.toggleSpin=false
+            })
         },
-        remove (index) {
+        changePage(val) {
+            this.searchFm.page = val - 1;
+            this.searchBtn();
+        },
+        handleSizeChange (val){
+            this.searchFm.size = val;
+            this.currentPage=0;
+            this.searchFm.page=0;
+            this.searchBtn();
+        },
+        //编辑
+        edit (row,index) {
+            this.editor=true
+            this.$refs.Aloadding1.toggleSpin=true
+            productionTaskFindbyid(row.id).then((res) => {
+                    this.editorProductionTask=res.data 
+                    this.$refs.Aloadding1.toggleSpin=false
+                })
+        },
+         //修改
+        ok () {
+            this.ed = false
+            this.$nextTick(()=>{
+                this.ed = true
+            })
+            this.$refs['editorProductionRef'].validate((valid)=>{
+                if(valid){
+                    productionTaskEdit(this.editorProductionTask).then((res) =>{
+                        this.$Message.info('修改成功')
+                        this.editor=false
+                        this.searchBtn()
+                    })
+                }else{
+                    this.$Message.error('请正确填写信息')
+                }
+            })
+        },
+        cancel () {
+            // this.$Message.info('取消');
+        },
+        //删除
+        remove (row,index) {
             this.$Modal.confirm({
                 title:"删除",
                 content:"<p>确定要删除这条记录吗？</p>",
                 onOk: () => {
-                    this.dataTable.splice(index, 1)
-                    this.$Message.info('删除成功')
+                    productionTaskDelete(row.id).then((res) =>{
+                        this.searchBtn()
+                    })
+                    // this.dataTable.splice(index, 1)
+                    // this.$Message.info('删除成功')
                 },
             })
         },
+        //新增显示按钮
         showAddRoad(){
             this.modal1=true
+            this.$refs['productionRef'].resetFields()
         },
-        ok () {
-            this.$Message.info('确定');
+        // 增加
+        Addok () {
+            this.$refs.Aloadding.toggleSpin=true
+            this.add = false;
+            this.$nextTick(() => {
+                this.add = true;
+            });
+            this.$refs['productionRef'].validate((valid)=>{
+                if(valid){
+                    productionTasks(this.addProductionTask).then((res) => {
+                        this.dataTable = res.content;
+                        this.searchBtn()
+                        this.$refs.Aloadding.toggleSpin=false
+                        this.modal1 = false;
+                    })
+                }else{
+                    this.$Message.error("请正确填写信息");
+                    this.$refs.Aloadding.toggleSpin=false
+                }
+            })
         },
-        cancel () {
-            this.$Message.info('取消');
-        }
+       
+        
+       
+    },
+    mounted(){
+       this.searchBtn()
     }
 }
 </script>

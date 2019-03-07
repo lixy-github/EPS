@@ -5,8 +5,8 @@
         <Card :bordered="false" v-if="!register">
             <div class="login-title">用户登录</div>
             <Form ref="loginForm" :model="loginForm" :rules="ruleLogin" class="form-box">
-                <FormItem prop="user">
-                    <Input type="text" v-model="loginForm.user" placeholder="请输入手机号/邮箱">
+                <FormItem prop="username">
+                    <Input type="text" v-model="loginForm.username" placeholder="请输入手机号/邮箱">
                         <Icon type="ios-person-outline" slot="prepend"></Icon>
                     </Input>
                 </FormItem>
@@ -36,13 +36,13 @@
             </div>
             <div class="form-box">
                 <Form ref="registerPhone" :model="registerPhone" :rules="ruleRegister">
-                    <FormItem prop="phone">
-                        <Input type="text" v-model="registerPhone.phone" placeholder="请输入手机号"/>
+                    <FormItem prop="username">
+                        <Input type="text" v-model="registerPhone.username" placeholder="请输入手机号"/>
                     </FormItem>
                     <FormItem prop="password">
                         <Input type="password" v-model="registerPhone.password" placeholder="密码（6-16个字符；英文或数字）"/>
                     </FormItem>
-                    <FormItem prop="confirmPwd">
+                    <!-- <FormItem prop="confirmPwd">
                         <Input type="password" v-model="registerPhone.confirmPwd" placeholder="请再次输入密码"/>
                     </FormItem>
                     <FormItem prop="verificationCode">
@@ -57,9 +57,9 @@
                             阅读并同意易品速的
                             <span>「服务协议」</span>
                         </span>
-                    </div>
+                    </div> -->
                     <FormItem>
-                        <Button type="primary" long size="large" @click="loginSubmit(registerPhone)">注册</Button>
+                        <Button type="primary" long size="large" @click="loginSubmitp()">注册</Button>
                     </FormItem>
                 </Form>
                 <div class="back-login">
@@ -110,16 +110,34 @@
     </div>
 </template>
 <script>
-import {register} from "../../api/login"
+import {registerP,register, login} from "../../api/login"
+import Storage from '../../libs/Storage'
+
 export default {
     data () {
+        // 
+        const validateUsername = (rule, value, callback) => {
+            register({username: value}).then(res => {
+                if (res.data) {
+                    callback()
+                } else {
+                    callback(new Error('该用户名已存在'))
+                }
+            })
+        };
         // 验证手机号
         const validatePhone = (rule, value, callback) => {
             var phoneReg = /^[1][3,4,5,7,8,9][0-9]{9}$/;
             if (!phoneReg.test(value)) {
                 callback(new Error("请输入正确的手机号"));
             } else {
-                callback();
+                register({username: value}).then(res => {
+                    if (res.data) {
+                        callback()
+                    } else {
+                        callback(new Error('该手机号已注册'))
+                    }
+            })
             }
         };
         // 验证注册手机密码
@@ -168,13 +186,13 @@ export default {
 
         return {
             loginForm: {
-                user: "",
+                username: "",
                 password: "",
-                rememberPwd: true
+                // rememberPwd: true
             },
             ruleLogin: {
-                user: [
-                    { required: true, message: '请输入用户名', trigger: 'blur' }
+                username: [
+                    { required: true, message: '请输入用户名' , trigger: 'blur'}
                 ],
                 password: [
                     { required: true, message: '请输入密码', trigger: 'blur' },
@@ -184,22 +202,22 @@ export default {
             register: false,
             email: false,
             registerPhone: {
-                phone: "",
+                username: "",
                 password: "",
-                confirmPwd: "",
-                verificationCode: "",
-                phoneCode: "",
-                agreement: false
+                // confirmPwd: "",
+                // verificationCode: "",
+                // phoneCode: "",
+                // agreement: false
             },
             ruleRegister: {
-                phone: [
+                username: [
                     { required: true, message: '请输入手机号', trigger: 'blur' },
                     { validator: validatePhone, trigger: "change" }
                 ],
-                password: [
-                    { required: true, message: '请输入密码', trigger: 'blur' },
-                    { validator:validatePassword, trigger: 'change' }
-                ],
+                // password: [
+                //     { required: true, message: '请输入密码', trigger: 'blur' },
+                //     { validator:validatePassword, trigger: 'change' }
+                // ],
                 confirmPwd: [
                     { validator:validateRePwd, trigger: ['change', 'blur'] }
                 ],
@@ -240,16 +258,29 @@ export default {
         }
     },
     methods: {
-        // 登录
+        //登陆
         loginSubmit() {
-            this.$router.push("/index/Index");
-            // this.$refs['registerPhone'].validate((valid) => {
-            //     if(valid){
-            //         register(this.registerPhone).then(res=>{
-            //             console.log(res)
-            //         })
-            //     }
-            // })
+            this.$refs['loginForm'].validate((valid) => {
+                if(valid){
+                    login(this.loginForm).then(res => {
+                        Storage.set('token', res.token)
+                        this.$router.push("/index/Index");
+                    }).catch(err=>{
+                        this.$Message.error(err.response.data);
+                    })
+                }
+            })
+        },
+        // 手机注册
+        loginSubmitp() {
+            // this.$router.push("/index/Index");
+            this.$refs['registerPhone'].validate((valid) => {
+                if(valid){
+                    registerP(this.registerPhone).then(res=>{
+                        alert('注册成功!')
+                    })
+                }
+            })
         },
         // 切换到登录/注册
         toggleLoginRegister() {
@@ -304,7 +335,7 @@ export default {
     color: #f1390b;
 }
 .login-bg .register-box {
-    height: 500px;
+    height: 300px;
     margin-top: -260px;
 }
 .login-bg .register-title {

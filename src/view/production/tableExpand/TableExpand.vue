@@ -25,7 +25,7 @@
                 <FormItem label="完成率">
                     <span>{{ tablefrom.percent }}%</span>
                 </FormItem>
-                <FormItem>
+                <FormItem style="margin-top:32px">
                     <Button type="primary" size="small">编辑</Button>
                     <Button type="error" size="small">删除</Button>
                 </FormItem>

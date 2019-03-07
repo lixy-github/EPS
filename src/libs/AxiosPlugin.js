@@ -8,7 +8,10 @@ const Axios = axios.create({
 
 // 添加请求拦截器
 Axios.interceptors.request.use((config) => {
-    config.headers.common['Authorization'] = Storage.get('token')
+    const token = Storage.get('token');
+    if(token){
+        config.headers.common['Authorization'] = token;
+    }
     return config;
 }, (error) => {
     // 对请求错误做些什么
