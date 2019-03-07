@@ -141,7 +141,7 @@
         </Modal>
 
         <!-- 显示的表格 -->
-        <div>
+        <div style="position:relative">
             <Table 
             border 
             :columns="columns" 

@@ -277,7 +277,8 @@ export default {
             this.$refs['registerPhone'].validate((valid) => {
                 if(valid){
                     registerP(this.registerPhone).then(res=>{
-                        alert('注册成功!')
+                        this.$Message.info("注册成功!")
+                        this.$router.push("/index/Index");
                     })
                 }
             })

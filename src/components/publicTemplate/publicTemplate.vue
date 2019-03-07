@@ -12,7 +12,7 @@
                     <i-header></i-header>
                 </Header>
                 <Layout>
-                    <Content :style="{padding: '20px 20px 0 20px', minHeight: '280px', background: '#fff'}">
+                    <Content style="position:relative; padding:15px 20px 0 20px;">
                         <router-view></router-view>
                     </Content>
                 </Layout>
