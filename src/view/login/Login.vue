@@ -76,16 +76,16 @@
             </div>
             <div class="form-box">
                 <Form ref="registerEmail" :model="registerEmail" :rules="ruleRegisterEmail">
-                    <FormItem prop="emailNumber">
-                        <Input type="text" v-model="registerEmail.emailNumber" placeholder="请输入邮箱"/>
+                    <FormItem prop="username">
+                        <Input type="text" v-model="registerEmail.username" placeholder="请输入邮箱"/>
                     </FormItem>
-                    <FormItem prop="emailPwd">
-                        <Input type="password" v-model="registerEmail.emailPwd" placeholder="密码（6-16个字符；英文或数字）"/>
+                    <FormItem prop="password">
+                        <Input type="password" v-model="registerEmail.password" placeholder="密码（6-16个字符；英文或数字）"/>
                     </FormItem>
-                    <FormItem prop="confirmPwd">
+                    <!-- <FormItem prop="confirmPwd">
                         <Input type="password" v-model="registerEmail.confirmPwd" placeholder="请再次输入密码"/>
-                    </FormItem>
-                    <FormItem prop="verificationCode">
+                    </FormItem>-->
+                    <!-- <FormItem prop="verificationCode">
                         <Input type="text" v-model="registerEmail.verificationCode" placeholder="验证码"/>
                     </FormItem>
                     <FormItem prop="emailCode">
@@ -97,9 +97,9 @@
                             阅读并同意易品速的
                             <span>「服务协议」</span>
                         </span>
-                    </div>
+                    </div> -->
                     <FormItem>
-                        <Button type="primary" long size="large">注册</Button>
+                        <Button type="primary" @click="emailhanld" long size="large">注册</Button>
                     </FormItem>
                 </Form>
                 <div class="back-login">
@@ -110,7 +110,7 @@
     </div>
 </template>
 <script>
-import {registerP,register, login} from "../../api/login"
+import {registerP,emailP,register, login} from "../../api/login"
 import Storage from '../../libs/Storage'
 
 export default {
@@ -140,6 +140,16 @@ export default {
             })
             }
         };
+        //验证邮箱是否已注册
+        const validateEmail = (rule, value, callback) => {
+            register({username:value}).then(res => {
+                if(res.data){
+                    callback()
+                }else{
+                    callback(new Error('该邮箱已注册'))
+                }
+            })
+        }
         // 验证注册手机密码
         const validatePassword = (rule, value, callback) => {
             var pwdReg = /^[0-9a-zA-Z]{6,16}$/;
@@ -176,7 +186,7 @@ export default {
         const validateEmailRePwd = (rule, value, callback) => {
             if(value.length==0) {
                 callback(new Error("请再次输入密码"))
-            } else if(value!=this.registerEmail.emailPwd) {
+            } else if(value!=this.registerEmail.password) {
                 callback(new Error("两次密码不一致"))
             } else {
                 callback();
@@ -229,19 +239,20 @@ export default {
                 ]
             },
             registerEmail: {
-                emailNumber: "",
-                emailPwd: "",
+                username: "",
+                password: "",
                 confirmPwd: "",
-                verificationCode: "",
-                emailCode: "",
-                agreement: false
+                // verificationCode: "",
+                // emailCode: "",
+                // agreement: false
             },
             ruleRegisterEmail: {
-                emailNumber: [
+                username: [
                     { required: true, message: '请输入邮箱', trigger: 'blur' },
-                    { type: 'email', message: '请输入正确的邮箱', trigger: 'change' }
+                    { type: 'email', message: '请输入正确的邮箱', trigger: 'change' },
+                    { validator: validateEmail, trigger: "change" }
                 ],
-                emailPwd: [
+                password: [
                     { required: true, message: '请输入密码', trigger: 'blur' },
                     { validator:validateEmialPassword, trigger: 'change' }
                 ],
@@ -277,6 +288,17 @@ export default {
             this.$refs['registerPhone'].validate((valid) => {
                 if(valid){
                     registerP(this.registerPhone).then(res=>{
+                        this.$Message.info("注册成功!")
+                        this.$router.push("/index/Index");
+                    })
+                }
+            })
+        },
+        //邮箱注册
+        emailhanld() {
+            this.$refs['registerEmail'].validate((valid) => {
+                if(valid){
+                    emailP(this.registerEmail).then(res => {
                         this.$Message.info("注册成功!")
                         this.$router.push("/index/Index");
                     })
