@@ -28,16 +28,39 @@
             <div class="head-right rt">
                 <Avatar icon="ios-person" />
                 <span class="btn-icon fa fa-cog"></span>
-                <span class="btn-icon fa fa-power-off"></span>
+                <Dropdown>
+                    <a href="javascript:void(0)">
+                        <!-- 下拉菜单 -->
+                        <span class="btn-icon fa fa-power-off"></span>
+                    </a>
+                    <DropdownMenu slot="list">
+                        <DropdownItem >
+                            <p @click="Logout"><Icon type="md-power" /> 退出登陆</p>
+                        </DropdownItem>
+                        <DropdownItem >
+                            <p @click="Changep"><Icon type="md-unlock" /> 更改密码</p>
+                        </DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
             </div>
         </div>
     </div>
 </template>
 <script>
+import Storage from "../../libs/Storage"
 export default {
     data () {
         return {
         }
+    },
+    methods:{
+        //退出登陆
+        Logout(){
+            Storage.remove("token")
+            this.$router.push('/login')
+        },
+        //更改密码
+        Changep(){}
     },
 }
 </script>
@@ -92,7 +115,7 @@ export default {
     margin: -5px 10px 0 25px;
 }
 .head-right {
-    margin-left: 30px;
+    margin-right: 13px;
     margin-top: -4px;
 }
 .head-right .btn-icon{
