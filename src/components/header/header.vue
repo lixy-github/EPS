@@ -3,7 +3,7 @@
         <div class="header clearfix">
             <!-- 左侧 -->
             <div class="header-left lt">
-                <span class="head-title">易品速物联网平台</span>
+                <span class="head-title">易品速协同制造平台</span>
                 <div class="select-dropdown">
                     <Dropdown>
                         <a href="javascript:void(0)">
@@ -11,11 +11,11 @@
                             <Icon type="ios-arrow-down"></Icon>
                         </a>
                         <DropdownMenu slot="list">
-                            <DropdownItem>驴打滚</DropdownItem>
-                            <DropdownItem>炸酱面</DropdownItem>
-                            <DropdownItem>豆汁儿</DropdownItem>
-                            <DropdownItem>冰糖葫芦</DropdownItem>
-                            <DropdownItem>北京烤鸭</DropdownItem>
+                            <DropdownItem>协同制造</DropdownItem>
+                            <DropdownItem>工业互联</DropdownItem>
+                            <DropdownItem>金融服务</DropdownItem>
+                            <DropdownItem>公艺设计</DropdownItem>
+                            <DropdownItem>行业云</DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
                 </div>

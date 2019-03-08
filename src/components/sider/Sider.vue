@@ -3,7 +3,7 @@
         <!-- logo -->
         <div class="logo">
             <div v-if="!isCollapsed" class="logo-bg">
-                <div class="logo-title">易品速物联网平台</div>
+                <img src="../../../static/img/logo-light.png">
             </div>
             <div v-if="isCollapsed" class="logo-min">
                 <img src="../../../static/img/logo.png">
@@ -138,12 +138,10 @@ export default {
 .sider-logo .logo-bg {
     width: 100%;
     height: 100%;
-    /* background: url('../../../static/img/logo.png') no-repeat 50%;
-    background-size: 75% 54%;  */
 }
-.sider-logo .logo-bg .logo-title {
-    color: #fff;
-    font-size: 19px;
+.sider-logo .logo-bg img {
+    width: 130px;
+    height: 75px;
 }
 .sider-logo .logo-min {
     width: 100%;
