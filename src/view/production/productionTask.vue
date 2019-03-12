@@ -29,7 +29,7 @@
         </div>
        
         <!-- 增加 -->
-        <Modal
+        <!-- <Modal
             v-model="modal1"
             title="增加生产任务"
             :loading="add"
@@ -42,8 +42,17 @@
                 <FormItem label="客户名称" prop="custom">
                     <Input v-model="addProductionTask.custom"/>
                 </FormItem>
+                <FormItem label="产品名称" prop="product">
+                    <Input v-model="addProductionTask.product"/>
+                </FormItem>
+                <FormItem label="款号" prop="styleCode">
+                    <Input v-model="addProductionTask.styleCode"/>
+                </FormItem>
                 <FormItem label="客户款号" prop="customCode">
                     <Input v-model="addProductionTask.customCode"/>
+                </FormItem>
+                <FormItem label="照片" prop="photo">
+                    <Input v-model="addProductionTask.photo"/>
                 </FormItem>
                 <FormItem label="本厂款号" prop="styleCode">
                     <Input v-model="addProductionTask.styleCode"/>
@@ -54,8 +63,17 @@
                 <FormItem label="生产数量" prop="qty">
                     <Input v-model="addProductionTask.qty"/>
                 </FormItem>
+                  <FormItem label="客户款号" prop="unit">
+                    <Input v-model="addProductionTask.unit"/>
+                </FormItem>
+                 <FormItem label="客户款号" prop="deliveryData">
+                    <Input v-model="addProductionTask.deliveryData"/>
+                </FormItem>
                 <FormItem label="品牌" prop="brand">
                     <Input v-model="addProductionTask.brand"/>
+                </FormItem>
+                <FormItem label="工序" prop="procedure">
+                    <Input v-model="addProductionTask.procedure"/>
                 </FormItem>
                 <FormItem label="备注说明" prop="memo">
                     <Input v-model="addProductionTask.memo"/>
@@ -78,8 +96,123 @@
                 </FormItem>
             </Form>
             <Spin ref="Aloadding"></Spin>
-        </Modal>
+        </Modal> -->
 
+        <!--增加 抽屉-->
+        <Drawer
+            title="增加生产任务"
+            v-model="value3"
+            width="60%"
+            :mask-closable="false"
+        >
+            <Form ref="productionRef" :model="addProductionTask" :rules="productionRules" :label-width="120" inline>
+                <!-- 上传照片 -->
+                <FormItem label="照片" prop="photo">
+                    <div class="demo-upload-list" v-if="this.addProductionTask.photo && this.addProductionTask.photo!=''" :key="1">
+                        <img :src="uploadAction+this.addProductionTask.photo">
+                        <div class="demo-upload-list-cover">
+                            <Icon type="ios-trash-outline" @click.native="handleRemoveModify()"></Icon>
+                        </div>
+                    </div>
+                    <Upload 
+                        v-else
+                        :key="2"
+                        ref="upload"
+                        :show-upload-list="false"
+                        accept="image/jpg, image/jpeg, image/png"
+                        :format="['jpg','jpeg','png']"
+                        :max-size="2048"
+                        :on-success="modifyHandleSuccess"
+                        :on-format-error="handleFormatError"
+                        :on-exceeded-size="handleMaxSize"
+                        :headers="headers"
+                        :data="uploadData"
+                        type="drag"
+                        :action="uploadAction+'api/public/upload'"
+                        style="display:inline-block;">
+                        <div style="width: 150px;height:150px;line-height: 150px;">
+                            <Icon type="ios-camera" size="60"></Icon>
+                        </div>
+                    </Upload>
+                </FormItem>
+                <FormItem label="生产单号" prop="moCode" :label-width="160" style="margin-left:-53px;">
+                    <Input v-model="addProductionTask.moCode"/>
+                </FormItem>
+                <FormItem label="客户名称" prop="custom" style="width:261px">  
+                     <Select v-model="addProductionTask.custom" filterable>
+                        <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
+                    </Select>
+                </FormItem>
+                <div style="margin:-126px 0 0 273px">
+                <FormItem label="产品名称" prop="product">
+                    <Input v-model="addProductionTask.product"/>
+                </FormItem>
+                <FormItem label="款号" prop="styleCode">
+                    <Input v-model="addProductionTask.styleCode"/>
+                </FormItem>
+                <FormItem label="客户款号" prop="customCode">
+                    <Input v-model="addProductionTask.customCode"/>
+                </FormItem>
+                <FormItem label="品牌" prop="brand">
+                    <Input v-model="addProductionTask.brand"/>
+                </FormItem>
+                </div>
+                <FormItem label="针数" prop="pins">
+                    <Input v-model="addProductionTask.pins"/>
+                </FormItem>
+                 <FormItem label="合同交期" prop="deliveryData" style="width:260px">
+                    <DatePicker type="date" v-model="addProductionTask.deliveryData"></DatePicker>
+                </FormItem>
+               
+                <FormItem label="工序" prop="procedure" style="width:260px">
+                    <Select addProductionTask.procedure>
+                        <Option v-for="item in Process" :key="item.value" value="item.label">{{item.label}}</Option>
+                    </Select>
+                </FormItem>
+                 <FormItem label="总数量" prop="qty">
+                    <Input v-model="addProductionTask.qty"/>
+                </FormItem>
+                  <FormItem label="计量单位" prop="unit" style="width:260px">
+                    <Select v-model="addProductionTask.unit">
+                        <Option value="件">件</Option>
+                        <Option value="包">包</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="备注说明" prop="memo">
+                    <Input v-model="addProductionTask.memo"/>
+                </FormItem>
+            </Form>
+            <div style="border:0.5px solid #e8eaec;margin-bottom:14px"></div>
+            <!-- 生产任务数量详情 -->
+            <Form ref="certificatesList" :label-width="80" inline>
+                <FormItem  v-for="(item,index) in this.certificatesList" :key="index">
+                    <FormItem label="颜色" prop="color" style="width:140px;margin-left: -39px;">
+                        <Select v-model="item.color">
+                            <Option v-for="item in colour" :value="item.value" :key="item.value">{{item.label}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem label="尺码" prop="size" style="width:140px">
+                    <Select v-model="item.size">
+                        <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
+                    </Select> 
+                    </FormItem>
+                    <FormItem label="数量" prop="qty">
+                        <Input v-model="item.qty"/>
+                    </FormItem>
+                   
+                    <div style="margin-left: 479px;margin-top: -33px;">
+                        <Button type="dashed" style="margin-left:119px" @click="addCertificatesEdit()" icon="md-add">添加</Button>
+                        <Button type="primary" style="margin-left: 6px;" @click="handleRemove(index)">删除</Button>
+                    </div>
+                </FormItem>
+                <div class="demo-drawer-footer">
+                    <Button style="margin-right: 8px" @click="value3 = false">取消</Button>
+                    <Button type="primary" @click="submit()">提交</Button>
+                </div>
+            </Form>
+           
+            <Spin ref="Aloadding"></Spin>
+        </Drawer>   
         <!-- 编辑 -->
         <Modal
             v-model="editor"
@@ -100,7 +233,28 @@
                     <Input v-model="editorProductionTask.moCode"/>
                 </FormItem>
                 <FormItem label="客户名称" prop="custom">
-                    <Input v-model="editorProductionTask.custom"/>
+                    <!-- <Input v-model="editorProductionTask.custom"/> -->
+                    <Select v-model="editorProductionTask.custom">
+                        <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
+                    </Select>
+                </FormItem>
+                 <FormItem label="客户款号" prop="customCode">
+                    <Input v-model="editorProductionTask.customCode"/>
+                </FormItem>
+                <FormItem label="产品名称" prop="product">
+                    <Input v-model="editorProductionTask.product"/>
+                </FormItem>
+                 <FormItem label="照片" prop="photo">
+                    <Input v-model="editorProductionTask.photo"/>
+                </FormItem>
+                <FormItem label="工序" prop="procedure">
+                    <Input v-model="editorProductionTask.procedure"/>
+                </FormItem>
+                 <FormItem label="款号" prop="styleCode">
+                    <Input v-model="editorProductionTask.styleCode"/>
+                </FormItem>
+                 <FormItem label="合同交期" prop="deliveryData">
+                    <Input v-model="editorProductionTask.deliveryData"/>
                 </FormItem>
                 <FormItem label="客户款号" prop="customCode">
                     <Input v-model="editorProductionTask.customCode"/>
@@ -153,7 +307,7 @@
                 <Button type="error" size="small" @click="remove(row,index)">删除</Button>
             </template>
             </Table>
-            <Spin ref="Aloadding2"></Spin>
+            <!-- <Spin ref="Aloadding2"></Spin> -->
         </div>
        
         
@@ -174,12 +328,18 @@
 </template>
 <script>
 import Spin from '../spin/spin'
+import axios from '../../libs/AxiosPlugin'
+import Storage from '../../libs/Storage'
 import TableExpand from './tableExpand/TableExpand'
-import {productionTasks,productiontasksFindall,productionTaskDelete,
-        productionTaskEdit,productionTaskFindbyid} from "../../api/production/productionTask.js"
+import {fileUpload,userList,productionTasks,productiontasksFindall,productionTaskDelete,
+        productionTaskEdit,productionTaskFindbyid,AdddcMoDetail} from "../../api/production/productionTask.js"
 export default {
     data () {
         return {
+            uploadAction:process.env.API_URL,
+            uploadData:{ folderName:"driver/head" },
+            constomer:{},
+            value3:false,
             ed:true,
             add: true,
             searchFm:{
@@ -188,6 +348,37 @@ export default {
                 size: 10,
                 sort: "createTime,desc"
             },
+            certificatesList:[
+                {
+                    "bzQty": "",
+                    "color": "",
+                    "fzQty": "",
+                    "hjQty": "",
+                    "qty": "",
+                    "size": "",
+                    "tjQty": "",
+                    "ztQty": "",
+                }
+            ],
+            Process: [
+                    {
+                        value:"横机",
+                        label:"横机"
+                    },
+                    {
+                        value:"套口",
+                        label:"套口"
+                    },
+                    {
+                        value:"洗整",
+                        label:"洗整"
+                    },
+                   
+                    {
+                        value:"包装",
+                        label:"包装"
+                    },
+                ],
             currentPage:0,
             total:0,
             dataTable:[],
@@ -198,9 +389,9 @@ export default {
                 moCode:[
                     { required: true, message: "内容不能为空", trigger: "change" }
                 ],
-                custom:[
-                    {required: true, message: "内容不能为空", trigger: "change" }
-                ],
+                // custom:[
+                //     {required: true, message: '该内容为必须项', trigger: 'change'}
+                // ],
                 customCode:[
                     {required: true, message: "内容不能为空", trigger: "change" }
                 ],
@@ -230,6 +421,9 @@ export default {
                 ],
             },
             addProductionTask:{
+                deliveryData:"",
+                styleCode:"",
+                product:"",
                 moCode:"",
                 custom:"",
                 customCode:"",
@@ -241,6 +435,8 @@ export default {
                 size:"",
                 brand:"",
                 unit:"piece",
+                procedure:"",
+                photo:"",
             },
             columns: [
                 {
@@ -349,11 +545,11 @@ export default {
             ],
             colour:[
                 {
-                    value:"red",
+                    value:"红色",
                     label:"红色"
                 },
                 {
-                    value:"navy",
+                    value:"藏青",
                     label:"藏青"
                 }
             ]
@@ -364,14 +560,70 @@ export default {
         Spin
     },
     methods: {
+        submit(){
+            this.$refs['addProductionTask'].validate((valid)=>{
+                if(valid){
+                    productionTasks(this.addProductionTask).then(res =>{
+                        console.log(res)
+                        this.value3 = false
+                   })
+                }else{
+                    this.$Message.error("请填写正确信息")
+                }
+            })
+            this.certificatesList.forEach(val =>{
+                productionTasks(val).then(res =>{
+                    console.log(res)
+                })
+            })
+        },
+        addCertificatesEdit(){
+            this.certificatesList.push({
+                "bzQty": "",
+                "color": "",
+                "fzQty": "",
+                "hjQty": "",
+                "qty": "",
+                "size": "",
+                "tjQty": "",
+                "ztQty": "",
+            });
+        },
+        handleRemove(index){
+            if(index>0){
+                this.certificatesList.splice(index,1)
+            }
+        },
+        // 修改-删除照片
+        handleRemoveModify(){
+            this.addProductionTask.photo="";
+        },
+         // 修改-人员照片-成功
+        modifyHandleSuccess (res, file) {
+            this.$set( this.addProductionTask, "photo", res.data.substr(1));
+        },
+        // 上传格式错误
+        handleFormatError(file) {
+        this.$Message.warning({
+            content:"添加 " +file.name +" 是不正确的, 请选择 jpg 或 png"
+             });
+        },
+        // 照片超出限定大小
+        handleMaxSize (file) {
+            this.$Message.warning({
+                content: '照片 ' + file.name + ' 太大, 不能超过2M'
+            });
+        },
+        //添加
+        handleAdd(){},
         //搜索
         searchBtn() {
-            this.$refs.Aloadding2.toggleSpin=true
+            // this.$refs.Aloadding2.toggleSpin=true
             productiontasksFindall(this.searchFm).then((res)=>{
             this.dataTable = res.data.content
             this.total = res.data.totalElements
             this.currentPage = res.data.number
-            this.$refs.Aloadding2.toggleSpin=false
+            // this.$refs.Aloadding2.toggleSpin=false
             })
         },
         changePage(val) {
@@ -431,6 +683,7 @@ export default {
         //新增显示按钮
         showAddRoad(){
             this.modal1=true
+            this.value3=true
             this.$refs['productionRef'].resetFields()
         },
         // 增加
@@ -454,12 +707,71 @@ export default {
                 }
             })
         },
-       
-        
-       
+    },
+    computed:{
+         // 人员照片
+        headers(){
+            let jwtToken = Storage.get("token");
+            return { Authorization:jwtToken }; 
+        }
     },
     mounted(){
        this.searchBtn()
+       userList().then(res =>{
+           this.constomer = res.data.content
+       })
     }
 }
 </script>
+<style scope>
+    .demo-drawer-footer{
+        width: 100%;
+        /* position: absolute; */
+        bottom: 0;
+        left: 0;
+        border-top: 1px solid #e8e8e8;
+        padding: 10px 16px;
+        text-align: right;
+        background: #fff;
+    }
+    .ivu-upload-drag{
+        width: 150px;
+        height: 150px;
+    }
+    .demo-upload-list{
+        display: inline-block;
+        width: 150px;
+        height: 150px;
+        text-align: center;
+        line-height: 60px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #fff;
+        position: relative;
+        box-shadow: 0 1px 1px rgba(0,0,0,.2);
+        margin-right: 4px;
+    }
+    .demo-upload-list img{
+        width: 100%;
+        height: 100%;
+    }
+    .demo-upload-list-cover{
+        display: none;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,.6);
+    }
+    .demo-upload-list:hover .demo-upload-list-cover{
+        display: block;
+    }
+    .demo-upload-list-cover i{
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+        margin: 0 2px;
+    }
+</style>

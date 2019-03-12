@@ -14,7 +14,7 @@
                             <DropdownItem>协同制造</DropdownItem>
                             <DropdownItem>工业互联</DropdownItem>
                             <DropdownItem>金融服务</DropdownItem>
-                            <DropdownItem>公艺设计</DropdownItem>
+                            <DropdownItem>工艺设计</DropdownItem>
                             <DropdownItem>行业云</DropdownItem>
                         </DropdownMenu>
                     </Dropdown>

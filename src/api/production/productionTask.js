@@ -15,3 +15,13 @@ export const productionTaskEdit = (data) => {return axios.put("api/productionTas
 
 //生产任务API（findById）
 export const productionTaskFindbyid = (id) => {return axios.get(`api/productionTasks/${id}`).then(res => res.data)}
+
+//用户信息API（用户列表）
+export const userList = (data) => {return axios.get("api/user",data).then(res => res.data)}
+
+//公共API（文件上传）
+export const fileUpload = (url) => {return axios.post("api/public/upload",data).then(res => res.data)}
+
+//生产任务单色码数量详表API （创建生产任务详情）
+export const AdddcMoDetail = (data) => {return axios.post("api/dcMoDetail",data).then(res => res.data)}
+
