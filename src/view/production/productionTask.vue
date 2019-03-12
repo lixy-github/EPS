@@ -561,7 +561,7 @@ export default {
     },
     methods: {
         submit(){
-            this.$refs['addProductionTask'].validate((valid)=>{
+            this.$refs['productionRef'].validate((valid)=>{
                 if(valid){
                     productionTasks(this.addProductionTask).then(res =>{
                         console.log(res)
@@ -571,11 +571,11 @@ export default {
                     this.$Message.error("请填写正确信息")
                 }
             })
-            this.certificatesList.forEach(val =>{
-                productionTasks(val).then(res =>{
-                    console.log(res)
-                })
-            })
+            // this.certificatesList.forEach(val =>{
+            //     productionTasks(val).then(res =>{
+            //         console.log(res)
+            //     })
+            // })
         },
         addCertificatesEdit(){
             this.certificatesList.push({
