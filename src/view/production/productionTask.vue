@@ -184,7 +184,7 @@
             </Form>
             <div style="border:0.5px solid #e8eaec;margin-bottom:14px"></div>
             <!-- 生产任务数量详情 -->
-            <Form ref="certificatesList" :label-width="80" inline>
+            <Form ref="productionRef" :label-width="80" inline>
                 <FormItem  v-for="(item,index) in this.certificatesList" :key="index">
                     <FormItem label="颜色" prop="color" style="width:140px;margin-left: -39px;">
                         <Select v-model="item.color">
@@ -561,10 +561,9 @@ export default {
     },
     methods: {
         submit(){
-            this.$refs['addProductionTask'].validate((valid)=>{
+            this.$refs['productionRef'].validate((valid)=>{
                 if(valid){
                     productionTasks(this.addProductionTask).then(res =>{
-                        console.log(res)
                         this.value3 = false
                    })
                 }else{
