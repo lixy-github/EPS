@@ -128,7 +128,7 @@
                         :headers="headers"
                         :data="uploadData"
                         type="drag"
-                        :action="uploadAction+'api/public/upload'"
+                        :action="uploadAction+'/api/public/upload'"
                         style="display:inline-block;">
                         <div style="width: 150px;height:150px;line-height: 150px;">
                             <Icon type="ios-camera" size="60"></Icon>
@@ -600,7 +600,7 @@ export default {
         },
          // 修改-人员照片-成功
         modifyHandleSuccess (res, file) {
-            this.$set( this.addProductionTask, "photo", res.data.substr(1));
+            this.$set( this.addProductionTask, "photo", res.data);
         },
         // 上传格式错误
         handleFormatError(file) {

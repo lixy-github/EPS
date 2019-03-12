@@ -4,6 +4,9 @@ body,
 {
     height: 100%;
 }
+body {
+    min-width: 1265px;
+}
 .clearfix {
     *zoom: 1;
 }
