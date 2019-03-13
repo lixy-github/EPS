@@ -11,7 +11,10 @@
                         </FormItem> -->
                          <FormItem prop="custom" label="客户名称" style="width:241px">
                             <!-- <DatePicker type="datetime" v-model="searchFm.custom" style="width:141px"></DatePicker> -->
-                                <Input v-model="searchFm.custom"/>
+                                <!-- <Input v-model="searchFm.custom"/> -->
+                                <Select v-model="searchFm.custom" clearable filterable>
+                                    <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
+                                </Select>
                         </FormItem>
                          <!-- <FormItem prop="endTime" label="---" style="width:241px;margin-left:-8%">
                             <DatePicker type="datetime" v-model="searchFm.endTime" style="width:141px"></DatePicker>
@@ -98,121 +101,121 @@
             <Spin ref="Aloadding"></Spin>
         </Modal> -->
 
-        <!--增加 抽屉-->
-        <Drawer
+        <!--增加 全屏-->
+        <Modal
+            :loading="add"
+            fullscreen
             title="增加生产任务"
-            v-model="value3"
-            width="60%"
-            :mask-closable="false"
-        >
-            <Form ref="productionRef" :model="addProductionTask" :rules="productionRules" :label-width="120" inline>
-                <!-- 上传照片 -->
-                <FormItem label="照片" prop="photo">
-                    <div class="demo-upload-list" v-if="this.addProductionTask.photo && this.addProductionTask.photo!=''" :key="1">
-                        <img :src="uploadAction+this.addProductionTask.photo">
-                        <div class="demo-upload-list-cover">
-                            <Icon type="ios-trash-outline" @click.native="handleRemoveModify()"></Icon>
+            @on-ok="Addok"
+            v-model="modal1"
+            :mask-closable="false">
+            <div style="width:910px;margin:auto">
+                <Form ref="productionRef" :model="addProductionTask" :rules="productionRules" :label-width="100" inline>
+                    <!-- 上传照片 -->
+                    <FormItem label="照片" prop="photo">
+                        <div class="demo-upload-list" v-if="this.addProductionTask.photo && this.addProductionTask.photo!=''" :key="1">
+                            <img :src="uploadAction+this.addProductionTask.photo">
+                            <div class="demo-upload-list-cover">
+                                <Icon type="ios-trash-outline" @click.native="handleRemoveModify()"></Icon>
+                            </div>
                         </div>
-                    </div>
-                    <Upload 
-                        v-else
-                        :key="2"
-                        ref="upload"
-                        :show-upload-list="false"
-                        accept="image/jpg, image/jpeg, image/png"
-                        :format="['jpg','jpeg','png']"
-                        :max-size="2048"
-                        :on-success="modifyHandleSuccess"
-                        :on-format-error="handleFormatError"
-                        :on-exceeded-size="handleMaxSize"
-                        :headers="headers"
-                        :data="uploadData"
-                        type="drag"
-                        :action="uploadAction+'/api/public/upload'"
-                        style="display:inline-block;">
-                        <div style="width: 150px;height:150px;line-height: 150px;">
-                            <Icon type="ios-camera" size="60"></Icon>
-                        </div>
-                    </Upload>
-                </FormItem>
-                <FormItem label="生产单号" prop="moCode" :label-width="160" style="margin-left:-53px;">
-                    <Input v-model="addProductionTask.moCode"/>
-                </FormItem>
-                <FormItem label="客户名称" prop="custom" style="width:261px">  
-                     <Select v-model="addProductionTask.custom" filterable>
-                        <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
-                    </Select>
-                </FormItem>
-                <div style="margin:-126px 0 0 273px">
-                <FormItem label="产品名称" prop="product">
-                    <Input v-model="addProductionTask.product"/>
-                </FormItem>
-                <FormItem label="款号" prop="styleCode">
-                    <Input v-model="addProductionTask.styleCode"/>
-                </FormItem>
-                <FormItem label="客户款号" prop="customCode">
-                    <Input v-model="addProductionTask.customCode"/>
-                </FormItem>
-                <FormItem label="品牌" prop="brand">
-                    <Input v-model="addProductionTask.brand"/>
-                </FormItem>
-                </div>
-                <FormItem label="针数" prop="pins">
-                    <Input v-model="addProductionTask.pins"/>
-                </FormItem>
-                 <FormItem label="合同交期" prop="deliveryData" style="width:260px">
-                    <DatePicker type="date" v-model="addProductionTask.deliveryData"></DatePicker>
-                </FormItem>
-               
-                <FormItem label="工序" prop="procedure" style="width:260px">
-                    <Select addProductionTask.procedure>
-                        <Option v-for="item in Process" :key="item.value" value="item.label">{{item.label}}</Option>
-                    </Select>
-                </FormItem>
-                 <FormItem label="总数量" prop="qty">
-                    <Input v-model="addProductionTask.qty"/>
-                </FormItem>
-                  <FormItem label="计量单位" prop="unit" style="width:260px">
-                    <Select v-model="addProductionTask.unit">
-                        <Option value="件">件</Option>
-                        <Option value="包">包</Option>
-                    </Select>
-                </FormItem>
-                <FormItem label="备注说明" prop="memo">
-                    <Input v-model="addProductionTask.memo"/>
-                </FormItem>
-            </Form>
-            <div style="border:0.5px solid #e8eaec;margin-bottom:14px"></div>
-            <!-- 生产任务数量详情 -->
-            <Form ref="productionRef" :label-width="80" inline>
-                <FormItem  v-for="(item,index) in this.certificatesList" :key="index">
-                    <FormItem label="颜色" prop="color" style="width:140px;margin-left: -39px;">
-                        <Select v-model="item.color">
-                            <Option v-for="item in colour" :value="item.value" :key="item.value">{{item.label}}</Option>
+                        <Upload 
+                            v-else
+                            :key="2"
+                            ref="upload"
+                            :show-upload-list="false"
+                            accept="image/jpg, image/jpeg, image/png"
+                            :format="['jpg','jpeg','png']"
+                            :max-size="2048"
+                            :on-success="modifyHandleSuccess"
+                            :on-format-error="handleFormatError"
+                            :on-exceeded-size="handleMaxSize"
+                            :headers="headers"
+                            :data="uploadData"
+                            type="drag"
+                            :action="uploadAction+'/api/public/upload'"
+                            style="display:inline-block;">
+                            <div style="width: 150px;height:150px;line-height: 150px;">
+                                <Icon type="ios-camera" size="60"></Icon>
+                            </div>
+                        </Upload>
+                    </FormItem>
+                    <FormItem label="生产单号" prop="moCode">
+                        <Input v-model="addProductionTask.moCode"/>
+                    </FormItem>
+                    <FormItem label="客户名称" prop="custom" style="width:240px">  
+                        <Select v-model="addProductionTask.custom" filterable>
+                            <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
                         </Select>
                     </FormItem>
-                    <FormItem label="尺码" prop="size" style="width:140px">
-                    <Select v-model="item.size">
-                        <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
-                    </Select> 
-                    </FormItem>
-                    <FormItem label="数量" prop="qty">
-                        <Input v-model="item.qty"/>
-                    </FormItem>
-                   
-                    <div style="margin-left: 479px;margin-top: -33px;">
-                        <Button type="dashed" style="margin-left:119px" @click="addCertificatesEdit()" icon="md-add">添加</Button>
-                        <Button type="primary" style="margin-left: 6px;" @click="handleRemove(index)">删除</Button>
+                    <div style="margin-top: -127px;margin-left: 263px;">
+                        <FormItem label="产品名称" prop="product">
+                            <Input v-model="addProductionTask.product"/>
+                        </FormItem>
+                        <FormItem label="款号" prop="styleCode">
+                            <Input v-model="addProductionTask.styleCode"/>
+                        </FormItem>
+                        <FormItem label="客户款号" prop="customCode">
+                            <Input v-model="addProductionTask.customCode"/>
+                        </FormItem>
+                        <FormItem label="品牌" prop="brand">
+                            <Input v-model="addProductionTask.brand"/>
+                        </FormItem>
                     </div>
-                </FormItem>
-                <div class="demo-drawer-footer">
-                    <Button style="margin-right: 8px" @click="value3 = false">取消</Button>
-                    <Button type="primary" @click="submit()">提交</Button>
-                </div>
-            </Form>
-           
-            <Spin ref="Aloadding"></Spin>
-        </Drawer>   
+                    <FormItem label="针数" prop="pins" style="margin-left: 8px;">
+                        <Input v-model="addProductionTask.pins"/>
+                    </FormItem>
+                    <FormItem label="合同交期" prop="deliveryData" style="width:240px">
+                        <DatePicker type="date" v-model="addProductionTask.deliveryData"></DatePicker>
+                    </FormItem>
+                    <FormItem label="工序" prop="procedures" style="width:240px">
+                        <Select v-model="addProductionTask.procedures">
+                            <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem label="总数量" prop="qty" style="margin-left: 8px;">
+                        <Input v-model="addProductionTask.qty"/>
+                    </FormItem>
+                    <FormItem label="计量单位" prop="unit" style="width:240px">
+                        <Select v-model="addProductionTask.unit">
+                            <Option value="件">件</Option>
+                            <Option value="包">包</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem label="备注说明" prop="memo">
+                        <Input v-model="addProductionTask.memo"/>
+                    </FormItem>
+                </Form>
+                <div style="border:0.5px solid #e8eaec;margin-bottom:14px"></div>
+                <!-- 生产任务数量详情 -->
+                <Form :label-width="80"  inline>
+                    <FormItem   v-for="(item,index) in this.certificatesList" :key="index">
+                        <FormItem label="颜色" prop="color">
+                            <Select v-model="item.color">
+                                <Option v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
+                            </Select>
+                        </FormItem>
+                        <FormItem label="尺码" prop="size">
+                            <Select v-model="item.size">
+                                <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
+                            </Select> 
+                        </FormItem>
+                        <FormItem label="数量" prop="qty"  >
+                            <Input v-model="item.qty" placeholder="请输入数量"/>
+                        </FormItem>
+                        <div style="margin-left: 232px;margin-top: -33px">
+                            <Button type="dashed" style="margin-left:119px" @click="addCertificatesEdit()" icon="md-add">添加</Button>
+                            <Button type="primary" style="margin-left: 6px;" @click="handleRemove(index)">删除</Button>
+                        </div>
+                    </FormItem>
+                    <!-- <div class="demo-drawer-footer">
+                        <Button style="margin-right: 8px" @click="value3 = false">取消</Button>
+                        <Button type="primary" @click="submit()">提交</Button>
+                    </div> -->
+                </Form>
+                <Spin ref="Aloadding"></Spin>
+            </div>
+        </Modal>   
         <!-- 编辑 -->
         <Modal
             v-model="editor"
@@ -276,7 +279,7 @@
                 </FormItem>
                  <FormItem label="颜色" prop="color">
                     <Select v-model="editorProductionTask.color">
-                        <Option v-for="item in colour" :value="item.value" :key="item.value">{{item.label}}</Option>
+                        <Option v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="尺码" prop="size">
@@ -286,12 +289,12 @@
                 </FormItem>
                 <FormItem label="计量单位" prop="unit">
                     <Select v-model="editorProductionTask.unit">
-                        <Option value="piece">件</Option>
-                        <Option value="pack">包</Option>
+                        <Option value="件">件</Option>
+                        <Option value="包">包</Option>
                     </Select>
                 </FormItem>
             </Form>
-            <Spin ref="Aloadding1"></Spin>
+            <Spin ref="Aloadding"></Spin>
         </Modal>
 
         <!-- 显示的表格 -->
@@ -358,6 +361,7 @@ export default {
                     "size": "",
                     "tjQty": "",
                     "ztQty": "",
+                    "moCode":""
                 }
             ],
             Process: [
@@ -434,8 +438,8 @@ export default {
                 color:"",
                 size:"",
                 brand:"",
-                unit:"piece",
-                procedure:"",
+                unit:"件",
+                procedures:"",
                 photo:"",
             },
             columns: [
@@ -505,7 +509,7 @@ export default {
                 },
                     {
                     title: '工序',
-                    key: "procedure",
+                    key: "procedures",
                     align: "center",
                     ellipsis: true,
                 },
@@ -543,7 +547,7 @@ export default {
                     label:"3XL"
                 }
             ],
-            colour:[
+            allColour:[
                 {
                     value:"红色",
                     label:"红色"
@@ -586,6 +590,7 @@ export default {
                 "size": "",
                 "tjQty": "",
                 "ztQty": "",
+                "moCode":"",
             });
         },
         handleRemove(index){
@@ -674,8 +679,6 @@ export default {
                     productionTaskDelete(row.id).then((res) =>{
                         this.searchBtn()
                     })
-                    // this.dataTable.splice(index, 1)
-                    // this.$Message.info('删除成功')
                 },
             })
         },
@@ -683,7 +686,7 @@ export default {
         showAddRoad(){
             this.modal1=true
             this.value3=true
-            this.$refs['productionRef'].resetFields()
+            this.$refs['productionRef'].resetFields();
         },
         // 增加
         Addok () {
@@ -699,6 +702,12 @@ export default {
                         this.searchBtn()
                         this.$refs.Aloadding.toggleSpin=false
                         this.modal1 = false;
+                    })
+                    this.certificatesList.forEach((val)=>{
+                        this.addProductionTask.qty=parseInt(val.qty)+parseInt(val.qty)+parseInt(val.qty)
+                        val.moCode=this.addProductionTask.moCode;
+                        AdddcMoDetail(val).then((res) => {
+                        })
                     })
                 }else{
                     this.$Message.error("请正确填写信息");
