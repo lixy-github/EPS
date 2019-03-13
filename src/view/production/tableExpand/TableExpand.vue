@@ -1,6 +1,7 @@
 <template>
     <div>
         <Table
+            border
             :columns="columns"
             :data="dataTable">
         </Table>

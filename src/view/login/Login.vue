@@ -193,12 +193,11 @@ export default {
             }
         }
 
-
         return {
             loginForm: {
                 username: "",
                 password: "",
-                // rememberPwd: true
+                rememberPwd: true
             },
             ruleLogin: {
                 username: [
@@ -274,7 +273,14 @@ export default {
             this.$refs['loginForm'].validate((valid) => {
                 if(valid){
                     login(this.loginForm).then(res => {
-                        Storage.set('token', res.token)
+                        Storage.set('token', res.token);
+                        Storage.set('username', this.loginForm.username);
+                        Storage.set('remberPwd', this.loginForm.rememberPwd);
+                        if (this.loginForm.rememberPwd) {
+                            Storage.set('password', this.loginForm.password);
+                        } else {
+                            Storage.set('password', '')
+                        }
                         this.$router.push("/index/Index");
                     }).catch(err=>{
                         this.$Message.error(err.response.data);
@@ -313,6 +319,16 @@ export default {
         // 切换到注册手机/邮箱
         togglePhoneEmail() {
             this.email = !this.email;
+        }
+    },
+    mounted() {
+        let username = Storage.get('username');
+        let password = Storage.get('password');
+        let remberPwd = Storage.get('remberPwd');
+        this.loginForm.username = username;
+        this.loginForm.rememberPwd = remberPwd;
+        if (remberPwd) {
+            this.loginForm.password = password;
         }
     }
 }
