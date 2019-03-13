@@ -231,7 +231,7 @@
                         <div class="demo-upload-list" v-if="this.editorProductionTask.photo && this.editorProductionTask.photo!=''" :key="1">
                             <img :src="uploadAction+this.editorProductionTask.photo">
                             <div class="demo-upload-list-cover">
-                                <Icon type="ios-trash-outline" @click.native="handleRemoveModify()"></Icon>
+                                <Icon type="ios-trash-outline" @click.native="edihandleRemove()"></Icon>
                             </div>
                         </div>
                         <Upload 
@@ -304,8 +304,8 @@
                 <div style="border:0.5px solid #e8eaec;margin-bottom:14px"></div>
                 <!-- 生产任务数量详情 -->
                 <Form :label-width="80"  inline>
-                    <FormItem   v-for="(item,index) in this.certificatesList" :key="index">
-                        <FormItem label="颜色" prop="color">
+                    <FormItem   v-for="(item,index) in this.editCertificatesList" :key="index">
+                        <FormItem label="颜色" prop="color" >
                             <Select v-model="item.color">
                                 <Option v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
                             </Select>
@@ -319,8 +319,8 @@
                             <Input v-model="item.qty" placeholder="请输入数量"/>
                         </FormItem>
                         <div style="margin-left: 232px;margin-top: -33px">
-                            <Button type="dashed" style="margin-left:119px" @click="addCertificatesEdit()" icon="md-add">添加</Button>
-                            <Button type="primary" style="margin-left: 6px;" @click="handleRemove(index)">删除</Button>
+                            <Button type="dashed" style="margin-left:119px" @click="addCertificates()" icon="md-add">添加</Button>
+                            <Button type="primary" style="margin-left: 6px;" @click="editHandleRemove(index)">删除</Button>
                         </div>
                     </FormItem>
                 </Form>
@@ -438,7 +438,8 @@ import axios from '../../libs/AxiosPlugin'
 import Storage from '../../libs/Storage'
 import TableExpand from './tableExpand/TableExpand'
 import {fileUpload,userList,productionTasks,productiontasksFindall,productionTaskDelete,
-        productionTaskEdit,productionTaskFindbyid,AdddcMoDetail,searchall,TaskdetailChecklist} from "../../api/production/productionTask.js"
+        productionTaskEdit,productionTaskFindbyid,AdddcMoDetail,searchall,TaskdetailChecklist,
+        modifyProductionTask} from "../../api/production/productionTask.js"
 export default {
     data () {
         return {
@@ -461,6 +462,19 @@ export default {
                 sort: "createTime,desc"
             },
             certificatesList:[
+                {
+                    "bzQty": "",
+                    "color": "",
+                    "fzQty": "",
+                    "hjQty": "",
+                    "qty": "",
+                    "size": "",
+                    "tjQty": "",
+                    "ztQty": "",
+                    "moCode":""
+                }
+            ],
+            editCertificatesList:[
                 {
                     "bzQty": "",
                     "color": "",
@@ -702,22 +716,44 @@ export default {
                 "moCode":"",
             });
         },
+        addCertificates(){
+            this.editCertificatesList.push({
+                "bzQty": "",
+                "color": "",
+                "fzQty": "",
+                "hjQty": "",
+                "qty": "",
+                "size": "",
+                "tjQty": "",
+                "ztQty": "",
+                "moCode":"",
+            });
+        },
         handleRemove(index){
             if(index>0){
                 this.certificatesList.splice(index,1)
+            }
+        },
+        editHandleRemove(index){
+            if(index>0){
+                this.editCertificatesList.splice(index,1)
             }
         },
          // 人员照片上传成功
         handleSuccess (res, file) {
             this.addProductionTask.photo=res.data;
         },
-        // 修改-删除照片
+        // 添加-删除照片
         handleRemoveModify(){
-            this.addProductionTask.photo="";
+            this.addProductionTask.photo=""
+        },
+        // 编辑-删除照片
+        edihandleRemove(){
+            this.editorProductionTask.photo=""
         },
          // 修改-人员照片-成功
         modifyHandleSuccess (res, file) {
-            this.$set( this.addProductionTask, "photo", res.data);
+            this.$set( this.editorProductionTask, "photo", res.data);
         },
         // 上传格式错误
         handleFormatError(file) {
@@ -754,18 +790,22 @@ export default {
             this.searchBtn();
         },
         //编辑
-        edit (row,index) {
+        edit (row,index) {   
+            // this.editorProductionTask.custom
+            console.log(row)
             this.searchalls.moCode = row.moCode
             this.editor=true
             this.$refs.Aloadding.toggleSpin=true
-            searchall(this.searchalls).then((res) => {
-                    console.log(res)
-                    // this.editorProductionTask=res.data 
+            productiontasksFindall(this.searchalls).then((res) => {
+                    this.editorProductionTask=res.data.content[0] 
                     this.$refs.Aloadding.toggleSpin=false
                 })
             this.detailChecklist.mocode = row.moCode
             TaskdetailChecklist(this.detailChecklist).then((res) => {
-                console.log(res)
+                this.editCertificatesList = []
+                res.data.content.forEach(val => {
+                    this.editCertificatesList.push(val)
+                })
             })
         },
          //修改
@@ -780,6 +820,12 @@ export default {
                         this.$Message.info('修改成功')
                         this.editor=false
                         this.searchBtn()
+                    })
+                    this.editCertificatesList.forEach((val)=>{
+                        this.editCertificatesList.qty=parseInt(val.qty)+parseInt(val.qty)+parseInt(val.qty)
+                        val.moCode=this.editCertificatesList.moCode;
+                        modifyProductionTask(val).then((res) => {
+                        })
                     })
                 }else{
                     this.$Message.error('请正确填写信息')
@@ -803,6 +849,19 @@ export default {
         },
         //新增显示按钮
         showAddRoad(){
+            this.certificatesList=[
+                {
+                    "bzQty": "",
+                    "color": "",
+                    "fzQty": "",
+                    "hjQty": "",
+                    "qty": "",
+                    "size": "",
+                    "tjQty": "",
+                    "ztQty": "",
+                    "moCode":""
+                }
+            ],
             this.modal1=true
             this.value3=true
             let count = this.certificatesList.length;
@@ -902,5 +961,22 @@ export default {
         font-size: 20px;
         cursor: pointer;
         margin: 0 2px;
+    }
+    .certificatesBox>.ivu-form-item-content{
+        display:inline-block;
+        width: 100%;
+        margin-left:0!important;
+        width: 130px;
+    }
+    .certificatesBox .ivu-form-item-content .ivu-form-item .ivu-form-item-content{
+        display:inline-block;
+    }
+    .certificatesBox .ivu-form-item-content .ivu-form-item{
+        width:232px;
+        margin-right:0;
+        margin-bottom:16px;
+    }
+    .certificatesBox .ivu-form-item-content .ivu-input{
+        width:100%;
     }
 </style>
