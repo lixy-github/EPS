@@ -4,7 +4,7 @@
         <!-- 用户登录 -->
         <Card :bordered="false" v-if="!register">
             <div class="login-title">用户登录</div>
-            <Form ref="loginForm" :model="loginForm" :rules="ruleLogin" class="form-box">
+            <Form ref="loginForm" :model="loginForm" :rules="ruleLogin" class="form-box" @keydown.enter.native="loginSubmit">
                 <FormItem prop="username">
                     <Input type="text" v-model="loginForm.username" placeholder="请输入手机号/邮箱">
                         <Icon type="ios-person-outline" slot="prepend"></Icon>
