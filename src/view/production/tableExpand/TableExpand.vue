@@ -29,7 +29,7 @@
                     },
                     {
                         title: '工序',
-                        key: 'procedure',
+                        key: 'procedures',
                         align: 'center',
                         ellipsis: true
                     },
@@ -51,6 +51,11 @@
         },
         methods:{
 
+        },
+        mounted(){
+            let aaa = [];
+            aaa.push(this.row)
+            this.dataTable=aaa
         }
     };
 </script>
