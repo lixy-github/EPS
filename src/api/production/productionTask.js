@@ -31,4 +31,7 @@ export const AdddcMoDetail = (data) => {return axios.post("/api/dcMoDetail",data
 export const TaskdetailChecklist = (params) => {return axios.get(`api/dcMoDetail/searchall?${qs.stringify(params)}`).then(res => res.data)}
 
 //生产任务单色码数量详表API（修改生产任务）
-export const modifyProductionTask = (id) => {return axios.put(`/api/dcMoDetail/${id}`).then(res => res.data)}
+export const modifyProductionTask = (data) => {return axios.put("/api/dcMoDetail",data).then(res => res.data)}
+
+//生产任务单色码数量详表API（任务编辑）
+export const modity = (data) => {return axios.put("api/dcMoDetail/moidty",data).then(res => res.data)}

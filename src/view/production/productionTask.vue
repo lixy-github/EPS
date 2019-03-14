@@ -243,7 +243,7 @@
                         <div >尺码</div>
                         <div>数量</div>
                     </div>
-                    <FormItem   v-for="(item,index) in this.editCertificatesList" :key="index">
+                    <FormItem v-for="(item,index) in this.editCertificatesList" :key="index">
                         <FormItem label="" prop="color" style="width:140px;margin-left:29px">
                             <Select v-model="item.color">
                                 <Option v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
@@ -257,7 +257,7 @@
                         <FormItem label="" prop="qty" style="width:140px;margin-left:99px">
                             <Input v-model="item.qty" placeholder="请输入数量"/>
                         </FormItem>
-                            <Button type="primary" style="margin-left: 6px;" @click="editHandleRemove(index)">删除</Button>
+                            <Button type="primary" style="margin-left: 6px;" @click="editHandleRemove(index,item.id)">删除</Button>
                     </FormItem>
                 </Form>
                 <Spin ref="Aloadding"></Spin>
@@ -462,7 +462,7 @@ import Storage from '../../libs/Storage'
 import TableExpand from './tableExpand/TableExpand'
 import {fileUpload,userList,productionTasks,productiontasksFindall,productionTaskDelete,
         productionTaskEdit,productionTaskFindbyid,AdddcMoDetail,searchall,TaskdetailChecklist,
-        modifyProductionTask} from "../../api/production/productionTask.js"
+        modifyProductionTask,modity} from "../../api/production/productionTask.js"
 export default {
     data () {
         const validatePass = (rule,value,callback) =>{
@@ -473,6 +473,12 @@ export default {
             }
         }
         return {
+            editInfo:{
+                ids:[],
+                jsonString:[]
+            },
+            Tasklist:[],
+            Modify:[],
             cont:0,
             view:false,
             outgoing:false,
@@ -855,8 +861,12 @@ export default {
                 this.certificatesList.splice(index,1)
             }
         },
-        editHandleRemove(index){
-            if(index>0){
+        editHandleRemove(index,id){
+            if(id){
+                this.editInfo.ids.push(id);
+            }
+
+            if(this.editCertificatesList.length>1){
                 this.editCertificatesList.splice(index,1)
             }
         },
@@ -927,6 +937,9 @@ export default {
                 })
             this.detailChecklist.mocode = row.moCode
             TaskdetailChecklist(this.detailChecklist).then((res) => {
+                res.data.content.forEach((val)=>{
+                    this.Tasklist.push(val)
+                })
                 this.editCertificatesList = []
                 res.data.content.forEach(val => {
                     this.editCertificatesList.push(val)
@@ -950,9 +963,12 @@ export default {
                     this.editCertificatesList.forEach((val)=>{
                         this.editCertificatesList.qty=parseInt(val.qty)+parseInt(val.qty)+parseInt(val.qty)
                         val.moCode=this.editCertificatesList.moCode;
-                        modifyProductionTask(val).then((res) => {
-                            console.log(val)
-                        })
+                        // modifyProductionTask(val).then((res) => {
+                        // })
+                    })
+                    this.editInfo.jsonString = this.editCertificatesList;
+                    modity(this.editInfo).then( res => {
+                        console.log(res)
                     })
                 }else{
                     this.$Message.error('请正确填写信息')
@@ -1016,9 +1032,9 @@ export default {
                         this.$refs.Aloadding.toggleSpin=false
                         this.modal1 = false;
                         this.certificatesList.forEach((val)=>{
-                        this.addProductionTask.qty=parseInt(val.qty)+parseInt(val.qty)+parseInt(val.qty)
-                        val.moCode=this.addProductionTask.moCode;
-                        val.moId=res.data.id
+                            this.addProductionTask.qty=parseInt(val.qty)+parseInt(val.qty)+parseInt(val.qty)
+                            val.moCode=this.addProductionTask.moCode;
+                            val.moId=res.data.id
                         AdddcMoDetail(val).then((res) => {
                         })
                       })
