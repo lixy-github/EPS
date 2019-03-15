@@ -97,7 +97,7 @@
                     <FormItem label="合同交期" prop="deliveryData" style="width:240px">
                         <DatePicker type="date" v-model="addProductionTask.deliveryData"></DatePicker>
                     </FormItem>
-                    <FormItem label="工序" prop="procedure" style="min-width:240px">
+                    <FormItem label="工序" prop="procedures" style="min-width:240px">
                         <Select v-model="addProductionTask.procedures" multiple>
                             <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
                         </Select>
@@ -394,7 +394,7 @@
             title="查看外发任务"
             @on-ok="ok"
             @on-cancel="cancel">
-            <div style="margin-left: 87px;">
+            <!-- <div style="margin-left: 87px;">
             <Steps :current="2" >
                 <Step title="领料发单"></Step>
                 <Step title="横机织造"></Step>
@@ -402,20 +402,26 @@
                 <Step title="后通整理"></Step>
                 <Step title="成品入库"></Step>
             </Steps>
-            </div>
+            </div> -->
             <Divider id='titleStyle'>生产任务清单</Divider>
+           <div style="display:flex;justify-content:space-around;font-size: 15px;margin-bottom:47px">
+                <div>产品名称：</div>
+                <div>生产单号：</div>
+                <div>款号：</div>
+                <div>客户款号：</div>
+                <div>品牌：</div>                
+             
+           </div>
+           <div style="display:flex;justify-content:space-around;font-size: 15px;margin-bottom:37px">
+                <div>计量单位：</div>
+                <div>针数：</div>
+                <div>合同交期：</div>
+                <div>工序：</div>
+                <div>总数量：</div>
+                <div>备注说明：</div>
+           </div>
            <div>
-               <div>产品名称：</div>
-               <div>生产单号：</div>
-               <div>款号：</div>
-               <div>客户款号：</div>
-               <div>品牌</div>                
-               <div>针数：</div>
-               <div>合同交期：</div>
-               <div>工序：</div>
-               <div>总数量：</div>
-               <div>计量单位：</div>
-               <div>备注说明：</div>
+               <Table :columns="lookProduction" :data="data10" border></Table>
            </div>
         </Drawer>  
 
@@ -430,7 +436,7 @@
                 <div>
                 <Icon type="ios-paper-plane-outline" size="20" @click="outgoinghanldclick(row)"/>
                 <Icon type="ios-eye-outline" size="20" @click="toView"/>
-                <Icon type="ios-open-outline" size="20" @click="edit(row,index)"/>   
+                <Icon type="ios-create-outline" size="20" @click="edit(row,index)"/>   
                 <!-- <Button type="primary" size="small" style="margin-right: 5px" @click="edit(row,index)">编辑</Button> -->
                 <Icon type="ios-trash-outline" size="20"  @click="remove(row,index)"/>
                 <!-- <Button type="error" size="small" @click="remove(row,index)">删除</Button> -->
@@ -473,9 +479,49 @@ export default {
             }
         }
         return {
+            lookProduction:[
+                {
+                    title:'外加工单位',
+                    align:'center',
+                    key:"color"
+                },
+                {
+                    title:'合同期限',
+                    align:'center',
+
+                },
+                {
+                    title:'颜色',
+                    align:'center',
+                    key:"color"
+                },
+                {
+                    title:'尺码',
+                    align:'center',
+                    key:"sizes"
+                },
+                {
+                    title:'数量',
+                    align:'center',
+                },
+                {
+                    title:'工序',
+                    align:'center',
+                },
+                 {
+                    title:'合计',
+                    align:'center',
+                },
+            ],
+            data10:[
+                {
+                    color: "红色",
+                    sizes: 'Ml',
+                },
+            ],
             editInfo:{
                 ids:[],
-                jsonString:[]
+                jsonString:""
             },
             Tasklist:[],
             Modify:[],
@@ -492,7 +538,7 @@ export default {
                 moCode:"",
             },
             detailChecklist:{
-                mocode:"",
+                moCode:"",
             },
             searchFm:{
                 custom:"",
@@ -653,8 +699,8 @@ export default {
                     }
                 },
                 {
-                    title: '名称',
-                    key: 'name',
+                    title: '产品名称',
+                    key: 'product',
                     align: 'center',
                     ellipsis: true
                 },
@@ -662,7 +708,16 @@ export default {
                     title: '产品图',
                     align: "center",
                     ellipsis: true,
-                    key: 'age'
+                    key: 'age',
+                    render:(h,params) =>{
+                        return h('div',[
+                            h('img',{
+                                attrs:{
+                                    src:"uploadAction+this.editorProductionTask.photo"
+                                }
+                            })
+                        ])
+                    }
                 },
                 {
                     title: '生产单号',
@@ -685,17 +740,18 @@ export default {
                 },
                 {
                     title: '工期',
-                    key: "",
+                    width:120,
+                    key: "deliveryData",
                     align: "center",
                     ellipsis: true,
                     sortable: true
                 },
-                {
-                    title: '客户名称',
-                    key: "custom",
-                    align: "center",
-                    ellipsis: true,
-                },
+                // {
+                //     title: '客户名称',
+                //     key: "custom",
+                //     align: "center",
+                //     ellipsis: true,
+                // },
                 {
                     title: '品牌',
                     key: "brand",
@@ -714,7 +770,6 @@ export default {
                 {
                     title: '完成率',
                     key: "",
-                    width: 160,
                     align: 'center'
                 },
                 {
@@ -792,7 +847,7 @@ export default {
              productiontasksFindall(this.searchalls).then((res) => {
                     this.outgoingProductionTask=res.data.content[0] 
                 })
-            this.detailChecklist.mocode = row.moCode
+            this.detailChecklist.moCode = row.moCode
             TaskdetailChecklist(this.detailChecklist).then((res) => {
                 this.outgoingCertificatesList = []
                 res.data.content.forEach(val => {
@@ -935,7 +990,7 @@ export default {
                     this.editorProductionTask=res.data.content[0] 
                     this.$refs.Aloadding.toggleSpin=false
                 })
-            this.detailChecklist.mocode = row.moCode
+            this.detailChecklist.moCode = row.moCode
             TaskdetailChecklist(this.detailChecklist).then((res) => {
                 res.data.content.forEach((val)=>{
                     this.Tasklist.push(val)
@@ -966,9 +1021,12 @@ export default {
                         // modifyProductionTask(val).then((res) => {
                         // })
                     })
-                    this.editInfo.jsonString = this.editCertificatesList;
+                    var aaa =  this.Tasklist[0].mocode;
+                   this.editCertificatesList.forEach(val=>{
+                       val.moCode = aaa
+                   })
+                    this.editInfo.jsonString = JSON.stringify(this.editCertificatesList);
                     modity(this.editInfo).then( res => {
-                        console.log(res)
                     })
                 }else{
                     this.$Message.error('请正确填写信息')
