@@ -112,16 +112,16 @@
                             <Option value="包">包</Option>
                         </Select>
                     </FormItem>
-                    <FormItem label="备注说明" prop="memo" style="width:341px">
+                    <FormItem label="备注说明" prop="memo" style="width:351px">
                         <Input type="textarea" :autosize="{minRows: 2,maxRows: 8}" v-model="addProductionTask.memo"/>
                     </FormItem>
                 </Form>
                 <Divider id='titleStyle'>生产任务详情</Divider>
                 <!-- 生产任务数量详情 -->
                 <Form :label-width="80"  inline>
-                    <div style="display:flex;justify-content:space-around;width:819px;font-size:13px;margin-bottom:7px">
-                        <div style="margin-left: 43px;">颜色</div>
-                        <div >尺码</div>
+                    <div style="display:flex;justify-content:space-around;width:565px;font-size:13px;margin-bottom:7px">
+                        <div style="margin-left: 98px;">颜色</div>
+                        <div>尺码</div>
                         <div>数量</div>
                     </div>
                     <FormItem v-for="(item,index) in this.certificatesList" :key="index">
@@ -130,15 +130,15 @@
                                 <Option v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
                             </Select>
                         </FormItem>
-                        <FormItem label="" prop="size" style="width:140px;margin-left:99px">
+                        <FormItem label="" prop="size" style="width:140px;margin-left:9px">
                             <Select v-model="item.size">
                                 <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
                             </Select> 
                         </FormItem>
-                        <FormItem label="" prop="qty" style="width:140px;margin-left:99px">
+                        <FormItem label="" prop="qty" style="width:140px;margin-left:9px">
                             <Input v-model="item.qty" placeholder="请输入数量"/>
                         </FormItem>
-                        <div style="margin-left: 232px;margin-top: -33px">
+                        <div style="margin-left: 62px;margin-top: -33px">
                             <Button type="primary" style="margin-left:457px;" @click="handleRemove(index)">删除</Button>
                         </div>
                     </FormItem>
@@ -194,14 +194,15 @@
                         <Input v-model="editorProductionTask.product"/>
                     </FormItem>
                     <div style="margin-top: -127px;margin-left: 263px;">
-                    <FormItem label="生产单号" prop="moCode">
-                        <Input v-model="editorProductionTask.moCode"/>
-                    </FormItem>
-                    <!-- <FormItem label="客户名称" prop="custom" style="width:240px">  
+                    <FormItem label="客户名称" prop="custom" style="width:240px">  
                         <Select v-model="editorProductionTask.custom" filterable>
                             <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
                         </Select>
-                    </FormItem> -->
+                    </FormItem>   
+                    <FormItem label="生产单号" prop="moCode">
+                        <Input v-model="editorProductionTask.moCode"/>
+                    </FormItem>
+                   
                         <FormItem label="款号" prop="styleCode">
                             <Input v-model="editorProductionTask.styleCode"/>
                         </FormItem>
