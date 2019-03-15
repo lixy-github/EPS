@@ -9,12 +9,12 @@
                                 <Option :value="company.name" v-for="company in companyList" :key="company.id" id="qy">{{ company.name }}</Option>
                             </Select>
                         </FormItem> -->
-                         <FormItem prop="custom" label="客户名称" style="width:241px">
+                         <FormItem prop="moCode" label="订单号" style="width:241px">
                             <!-- <DatePicker type="datetime" v-model="searchFm.custom" style="width:141px"></DatePicker> -->
-                                <!-- <Input v-model="searchFm.custom"/> -->
-                                <Select v-model="searchFm.custom" clearable filterable>
+                                <Input v-model="searchFm.moCode"/>
+                                <!-- <Select v-model="searchFm.custom" clearable filterable>
                                     <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
-                                </Select>
+                                </Select> -->
                         </FormItem>
                          <!-- <FormItem prop="endTime" label="---" style="width:241px;margin-left:-8%">
                             <DatePicker type="datetime" v-model="searchFm.endTime" style="width:141px"></DatePicker>
@@ -69,28 +69,29 @@
                             </div>
                         </Upload>
                     </FormItem>
-                     <FormItem label="产品名称" prop="product" style="width:497px">
-                        <Input v-model="addProductionTask.product"/>
-                    </FormItem>
-                     <div style="margin-top: -127px;margin-left: 263px;">
-                    <FormItem label="生产单号" prop="moCode">
-                        <Input v-model="addProductionTask.moCode"/>
-                    </FormItem>
-                    <!-- <FormItem label="客户名称" prop="custom" style="width:240px">  
-                        <Select v-model="addProductionTask.custom" filterable>
-                            <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
-                        </Select>
-                    </FormItem> -->
+                    
+                    <div style="margin-top: -184px;margin-left: 263px;">
+                        <FormItem label="产品名称" prop="product" style="width:496px">
+                            <Input v-model="addProductionTask.product"/>
+                        </FormItem>
+                        <FormItem label="客户名称" prop="custom" style="width:240px">  
+                            <Select v-model="addProductionTask.custom" filterable>
+                                <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
+                            </Select>
+                        </FormItem>
+                        <FormItem label="生产单号" prop="moCode">
+                            <Input v-model="addProductionTask.moCode"/>
+                        </FormItem>
                         <FormItem label="款号" prop="styleCode">
                             <Input v-model="addProductionTask.styleCode"/>
                         </FormItem>
                         <FormItem label="客户款号" prop="customCode">
                             <Input v-model="addProductionTask.customCode"/>
                         </FormItem>
-                        <FormItem label="品牌" prop="brand">
-                            <Input v-model="addProductionTask.brand"/>
-                        </FormItem>
                     </div>
+                     <FormItem label="品牌" prop="brand">
+                        <Input v-model="addProductionTask.brand"/>
+                    </FormItem>
                     <FormItem label="针数" prop="pins" style="margin-left: 8px;">
                         <Input v-model="addProductionTask.pins"/>
                     </FormItem>
@@ -111,8 +112,8 @@
                             <Option value="包">包</Option>
                         </Select>
                     </FormItem>
-                    <FormItem label="备注说明" prop="memo" style="width:241px">
-                        <Input type="textarea" :autosize="true" v-model="addProductionTask.memo"/>
+                    <FormItem label="备注说明" prop="memo" style="width:341px">
+                        <Input type="textarea" :autosize="{minRows: 2,maxRows: 8}" v-model="addProductionTask.memo"/>
                     </FormItem>
                 </Form>
                 <Divider id='titleStyle'>生产任务详情</Divider>
@@ -403,7 +404,7 @@
                 <Step title="成品入库"></Step>
             </Steps>
             </div> -->
-            <Divider id='titleStyle'>生产任务清单</Divider>
+            <!-- <Divider id='titleStyle'>生产任务清单</Divider> -->
            <div style="display:flex;justify-content:space-around;font-size: 15px;margin-bottom:47px">
                 <div>产品名称：</div>
                 <div>生产单号：</div>
@@ -541,7 +542,7 @@ export default {
                 moCode:"",
             },
             searchFm:{
-                custom:"",
+                moCode:"",
                 page: 0,
                 size: 10,
                 sort: "createTime,desc"
@@ -713,7 +714,12 @@ export default {
                         return h('div',[
                             h('img',{
                                 attrs:{
-                                    src:"uploadAction+this.editorProductionTask.photo"
+                                    src:this.uploadAction+params.row.photo
+                                },
+                                style:{
+                                    width:"85px",
+                                    height:"50px",
+                                    marginTop:"7px"
                                 }
                             })
                         ])
@@ -825,12 +831,13 @@ export default {
     methods: {
         //发送
         okOutgoing(){
+             console.log(this.outgoingProductionTask)
             this.outgoing = true;
             this.$nextTick(()=> {
                 this.outgoing = false
             })
             productionTasks(this.outgoingProductionTask).then(res => {
-
+               
             })
         },
         // 查看
@@ -845,6 +852,7 @@ export default {
             this.outgoing=true
              this.searchalls.moCode = row.moCode
              productiontasksFindall(this.searchalls).then((res) => {
+                    res.data.content[0].procedures = JSON.parse(res.data.content[0].procedures) 
                     this.outgoingProductionTask=res.data.content[0] 
                 })
             this.detailChecklist.moCode = row.moCode
@@ -882,6 +890,7 @@ export default {
                 "tjQty": "",
                 "ztQty": "",
                 "moCode":"",
+                "moId":"",
             });
         },
         addCertificates(){
@@ -895,6 +904,7 @@ export default {
                 "tjQty": "",
                 "ztQty": "",
                 "moCode":"",
+                "moId":"",
             });
         },
         outgoingCertificates(){
@@ -909,6 +919,7 @@ export default {
                 "ztQty": "",
                 "moCode":"",
                 "outgoingId":"",
+                "moId":"",
             });
         },
         handleRemove(index){
@@ -1021,9 +1032,13 @@ export default {
                         // modifyProductionTask(val).then((res) => {
                         // })
                     })
+                    console.log(this.Tasklist)
                     var aaa =  this.Tasklist[0].mocode;
+                    var moIds = this.Tasklist[0].moId
+                    console.log(moIds)
                    this.editCertificatesList.forEach(val=>{
                        val.moCode = aaa
+                       val.moId = moIds
                    })
                     this.editInfo.jsonString = JSON.stringify(this.editCertificatesList);
                     modity(this.editInfo).then( res => {
