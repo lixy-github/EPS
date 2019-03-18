@@ -4,7 +4,7 @@
         <!-- 用户登录 -->
         <Card :bordered="false" v-if="!register">
             <div class="login-title">用户登录</div>
-            <Form ref="loginForm" :model="loginForm" :rules="ruleLogin" class="form-box" @keydown.enter.native="loginSubmit">
+            <Form  ref="loginForm" :model="loginForm" :rules="ruleLogin" class="form-box" @keydown.enter.native="loginSubmit">
                 <FormItem prop="username">
                     <Input type="text" v-model="loginForm.username" placeholder="请输入手机号/邮箱">
                         <Icon type="ios-person-outline" slot="prepend"></Icon>
@@ -37,27 +37,27 @@
             <div class="form-box">
                 <Form ref="registerPhone" :model="registerPhone" :rules="ruleRegister">
                     <FormItem prop="username">
-                        <Input type="text" v-model="registerPhone.username" placeholder="请输入手机号"/>
+                        <Input v-model="registerPhone.username" placeholder="请输入手机号"/>
                     </FormItem>
                     <FormItem prop="password">
                         <Input type="password" v-model="registerPhone.password" placeholder="密码（6-16个字符；英文或数字）"/>
                     </FormItem>
-                    <!-- <FormItem prop="confirmPwd">
+                    <FormItem prop="confirmPwd">
                         <Input type="password" v-model="registerPhone.confirmPwd" placeholder="请再次输入密码"/>
                     </FormItem>
-                    <FormItem prop="verificationCode">
-                        <Input type="text" v-model="registerPhone.verificationCode" placeholder="验证码"/>
-                    </FormItem>
-                    <FormItem prop="phoneCode">
-                        <Input type="text" v-model="registerPhone.phoneCode" placeholder="手机动态码"/>
-                    </FormItem>
+                    <div class="cell-code" >
+                        <FormItem style="margin-bottom: 0px;"  prop="verificationCode">
+                            <Input v-model="registerPhone.verificationCode" placeholder="请输入图片验证码"/>
+                        </FormItem>
+                        <img @click="replaceCode()" :src="imgValidateCode">
+                    </div>
                     <div class="remember-pwd">
                         <Checkbox v-model="registerPhone.agreement"></Checkbox>
                         <span style="font-size:12px;">
                             阅读并同意易品速的
                             <span>「服务协议」</span>
                         </span>
-                    </div> -->
+                    </div>
                     <FormItem>
                         <Button type="primary" long size="large" @click="loginSubmitp()">注册</Button>
                     </FormItem>
@@ -79,17 +79,14 @@
                     <FormItem prop="username">
                         <Input type="text" v-model="registerEmail.username" placeholder="请输入邮箱"/>
                     </FormItem>
-                    <FormItem prop="password">
+                    <FormItem  prop="password">
                         <Input type="password" v-model="registerEmail.password" placeholder="密码（6-16个字符；英文或数字）"/>
                     </FormItem>
-                    <!-- <FormItem prop="confirmPwd">
-                        <Input type="password" v-model="registerEmail.confirmPwd" placeholder="请再次输入密码"/>
-                    </FormItem>-->
-                    <!-- <FormItem prop="verificationCode">
-                        <Input type="text" v-model="registerEmail.verificationCode" placeholder="验证码"/>
+                    <FormItem prop="confirmPwd">
+                        <Input type="password" v-model="registerEmail.confirmPwd" placeholder="请确认密码"/>
                     </FormItem>
-                    <FormItem prop="emailCode">
-                        <Input type="text" v-model="registerEmail.emailCode" placeholder="邮箱动态码"/>
+                    <FormItem prop="verificationCode">
+                        <Input type="text" v-model="registerEmail.verificationCode" placeholder="请输入邮箱动态码"/>
                     </FormItem>
                     <div class="remember-pwd">
                         <Checkbox v-model="registerEmail.agreement"></Checkbox>
@@ -97,7 +94,7 @@
                             阅读并同意易品速的
                             <span>「服务协议」</span>
                         </span>
-                    </div> -->
+                    </div>
                     <FormItem>
                         <Button type="primary" @click="emailhanld" long size="large">注册</Button>
                     </FormItem>
@@ -110,14 +107,18 @@
     </div>
 </template>
 <script>
-import {registerP,emailP,register, login} from "../../api/login"
+import {registerPhone,
+        registerEmail,
+        usernameValidate,
+        login,
+        ImageVerification
+        } from "../../api/login"
 import Storage from '../../libs/Storage'
 
 export default {
     data () {
-        // 
         const validateUsername = (rule, value, callback) => {
-            register({username: value}).then(res => {
+            usernameValidate({username: value}).then(res => {
                 if (res.data) {
                     callback()
                 } else {
@@ -131,7 +132,7 @@ export default {
             if (!phoneReg.test(value)) {
                 callback(new Error("请输入正确的手机号"));
             } else {
-                register({username: value}).then(res => {
+                usernameValidate({username: value}).then(res => {
                     if (res.data) {
                         callback()
                     } else {
@@ -142,11 +143,11 @@ export default {
         };
         //验证邮箱是否已注册
         const validateEmail = (rule, value, callback) => {
-            register({username:value}).then(res => {
+            usernameValidate({username:value}).then(res => {
                 if(res.data){
                     callback()
                 }else{
-                    callback(new Error('该邮箱已注册'))
+                    callback(new Error('该邮箱已注册'));
                 }
             })
         }
@@ -210,59 +211,63 @@ export default {
             },
             register: false,
             email: false,
+            position: "left",
             registerPhone: {
                 username: "",
                 password: "",
-                // confirmPwd: "",
-                // verificationCode: "",
-                // phoneCode: "",
-                // agreement: false
+                confirmPwd: "",
+                verificationCode: "",
+                phoneCode: "",
+                agreement: false
             },
+            imgValidateCode: '',
             ruleRegister: {
                 username: [
                     { required: true, message: '请输入手机号', trigger: 'blur' },
                     { validator: validatePhone, trigger: "change" }
                 ],
-                // password: [
-                //     { required: true, message: '请输入密码', trigger: 'blur' },
-                //     { validator:validatePassword, trigger: 'change' }
-                // ],
+                password: [
+                    { required: true, message: '请输入密码', trigger: 'blur' },
+                    { validator:validatePassword, trigger: 'change' }
+                ],
                 confirmPwd: [
-                    { validator:validateRePwd, trigger: ['change', 'blur'] }
+                    { required: true, message: '请确认密码', trigger: 'blur' },
+                    { validator:validateRePwd, trigger: 'blur' }
                 ],
                 verificationCode: [
-                    { required: true, message: '请输入验证码', trigger: 'blur' }
-                ],
-                phoneCode: [
-                    { required: true, message: '请输入手机动态码', trigger: 'blur' }
+                    { required: true, message: '请输入验证码', trigger: 'blur' },
+                    { validator:validateRePwd, trigger: 'blur' }
                 ]
             },
             registerEmail: {
                 username: "",
                 password: "",
                 confirmPwd: "",
-                // verificationCode: "",
-                // emailCode: "",
-                // agreement: false
+                verificationCode: "",
+                emailCode: "",
+                agreement: false
             },
             ruleRegisterEmail: {
                 username: [
                     { required: true, message: '请输入邮箱', trigger: 'blur' },
-                    { type: 'email', message: '请输入正确的邮箱', trigger: 'change' },
+                    { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' },
                     { validator: validateEmail, trigger: "change" }
                 ],
                 password: [
-                    { required: true, message: '请输入密码', trigger: 'blur' },
+                    { required: true, message: '请输入密码', trigger: 'change' },
                     { validator:validateEmialPassword, trigger: 'change' }
                 ],
                 confirmPwd: [
-                    { validator:validateEmailRePwd, trigger: ['change', 'blur'] }
+                    { required: true, message: '请确认密码', trigger: 'change' },
+                    { validator:validateEmailRePwd, trigger: 'blur' }
                 ],
                 verificationCode: [
-                    { required: true, message: '请输入验证码', trigger: 'blur' }
+                    { required: true, message: '请输入验证码', trigger: 'blur' },
+                    { validator:validateEmailRePwd, trigger: 'blur' }
                 ],
                 emailCode: [
-                    { required: true, message: '请输入邮箱动态码', trigger: 'blur' }
+                    { required: true, message: '请输入邮箱动态码', trigger: 'blur' },
+                    { validator:validateEmailRePwd, trigger: 'blur' }
                 ]
             }
         }
@@ -276,6 +281,7 @@ export default {
                         Storage.set('token', res.token);
                         Storage.set('username', this.loginForm.username);
                         Storage.set('remberPwd', this.loginForm.rememberPwd);
+                        console.log(res)
                         if (this.loginForm.rememberPwd) {
                             Storage.set('password', this.loginForm.password);
                         } else {
@@ -290,12 +296,11 @@ export default {
         },
         // 手机注册
         loginSubmitp() {
-            // this.$router.push("/index/Index");
             this.$refs['registerPhone'].validate((valid) => {
                 if(valid){
-                    registerP(this.registerPhone).then(res=>{
-                        this.$Message.info("注册成功!")
-                        this.$router.push("/index/Index");
+                    registerPhone(this.registerPhone).then(res=>{
+                        this.$Message.info("注册成功!");
+                        this.register = false;
                     })
                 }
             })
@@ -304,9 +309,10 @@ export default {
         emailhanld() {
             this.$refs['registerEmail'].validate((valid) => {
                 if(valid){
-                    emailP(this.registerEmail).then(res => {
-                        this.$Message.info("注册成功!")
-                        this.$router.push("/index/Index");
+                    registerEmail(this.registerEmail).then(res => {
+                        this.$Message.info("注册成功!");
+                        this.email = false;
+                        this.register = false;
                     })
                 }
             })
@@ -315,18 +321,44 @@ export default {
         toggleLoginRegister() {
             this.register = !this.register;
             this.email = false;
+            if (this.register) {
+                this.getImgCode()
+            }
         },
         // 切换到注册手机/邮箱
         togglePhoneEmail() {
             this.email = !this.email;
+            if (!this.email) {
+                this.getImgCode();
+            }
+        },
+        // 图片验证码
+        getImgCode() {
+            let data = {
+                width: 80,
+                height: 30,
+                length: 6,
+                fontSize: 18
+            }
+            ImageVerification(data).then(res => {
+                this.imgValidateCode = res.data.base64;
+            })
+        },
+        // 点击图片更换图片验证码
+        replaceCode() {
+            this.getImgCode();
         }
     },
     mounted() {
         let username = Storage.get('username');
         let password = Storage.get('password');
         let remberPwd = Storage.get('remberPwd');
-        this.loginForm.username = username;
-        this.loginForm.rememberPwd = remberPwd;
+        if (username != null) {
+            this.loginForm.username = username;
+        }
+        if (remberPwd != null) {
+            this.loginForm.rememberPwd = remberPwd;
+        }
         if (remberPwd) {
             this.loginForm.password = password;
         }
@@ -374,7 +406,7 @@ export default {
     color: #f1390b;
 }
 .login-bg .register-box {
-    height: 300px;
+    height: 420px;
     margin-top: -260px;
 }
 .login-bg .register-title {
@@ -402,5 +434,11 @@ export default {
 .back-login span {
     color: #333;
     cursor: pointer;
+}
+.cell-code{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 </style>
