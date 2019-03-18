@@ -38,3 +38,6 @@ export const deleteProduction = (id) => {return axios.delete(`/api/dcMoDetail/${
 
 //生产任务单色码数量详表API（任务编辑）
 export const modity = (data) => {return axios.put(`api/dcMoDetail/moidty?${qs.stringify(data,{arrayFormat:"repeat"})}`).then(res => res.data)}
+
+//生产任务单色码数量详表API（外发编辑列表）
+export const outgoingEdit = (data) => {return axios.get(`api/dcMoDetail/searwaifa?${qs.stringify(data)}`).then(res => res.data)}

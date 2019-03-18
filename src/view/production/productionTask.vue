@@ -112,7 +112,7 @@
                             <Option value="包">包</Option>
                         </Select>
                     </FormItem>
-                    <FormItem label="备注说明" prop="memo" style="width:351px">
+                    <FormItem label="备注说明" prop="memo" style="width:755px">
                         <Input type="textarea" :autosize="{minRows: 2,maxRows: 8}" v-model="addProductionTask.memo"/>
                     </FormItem>
                 </Form>
@@ -135,7 +135,7 @@
                                 <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
                             </Select> 
                         </FormItem>
-                        <FormItem label="" prop="qty" style="width:140px;margin-left:9px">
+                        <FormItem label=""  prop="qty" style="width:140px;margin-left:9px">
                             <Input v-model="item.qty" placeholder="请输入数量"/>
                         </FormItem>
                         <div style="margin-left: 62px;margin-top: -33px">
@@ -233,7 +233,7 @@
                         </Select>
                     </FormItem>
                     <br>
-                    <FormItem label="备注说明" prop="memo" style="width:351px">
+                    <FormItem label="备注说明" prop="memo" style="width:756px">
                         <Input type="textarea" :autosize="{minRows: 2,maxRows: 8}" v-model="editorProductionTask.memo" />
                     </FormItem>
                 </Form>
@@ -419,7 +419,7 @@
               <span style="font-size:16px;margin-right:17px">计量单位: <span style="font-size:14px">{{viewContent.unit}}</span></span>
               <span style="font-size:16px;margin-right:17px">总数量: <span style="font-size:14px">{{viewContent.qty}}</span></span> 
            </div>
-           <div>
+           <div style="margin-top:20px">
                <Table :columns="lookProduction" :data="data10" border></Table>
            </div>
         </Drawer>  
@@ -467,7 +467,8 @@ import Storage from '../../libs/Storage'
 import TableExpand from './tableExpand/TableExpand'
 import {fileUpload,userList,productionTasks,productiontasksFindall,productionTaskDelete,
         productionTaskEdit,productionTaskFindbyid,AdddcMoDetail,searchall,TaskdetailChecklist,
-        modifyProductionTask,modity} from "../../api/production/productionTask.js"
+        modifyProductionTask,modity,outgoingEdit} from "../../api/production/productionTask.js"
+import { parse } from 'semver';
 export default {
     data () {
         const validatePass = (rule,value,callback) =>{
@@ -478,6 +479,7 @@ export default {
             }
         }
         return {
+            count:0,
             data10:[],
             viewContent:{},
             lookProduction:[
@@ -499,12 +501,12 @@ export default {
                     align:'center',
                     key:"sizes"
                 },
-                // {
-                //     title:'总数量',
-                //     align:'center',
-                //     width:"100px",
-                //     key:"qty"
-                // },
+                {
+                    title:'计划数',
+                    align:'center',
+                    width:"100px",
+                    key:"qty"
+                },
                 {
                     title:'横机',
                     align:'center',
@@ -519,6 +521,7 @@ export default {
                             title: "比例", 
                             key: "",
                             aligin: 'center',
+                            width:'70px',
                         },
                     ]
                 },
@@ -536,6 +539,7 @@ export default {
                             title: "比例", 
                             key: "",
                             aligin: 'center',
+                            width:'70px',
                         },
                     ]
                 },
@@ -553,6 +557,7 @@ export default {
                             title: "比例", 
                             key: "",
                             aligin: 'center',
+                            width:'70px',
                         },
                     ]
                 },
@@ -568,6 +573,7 @@ export default {
                         },
                         {
                             title: "比例", 
+                            width:'70px',
                             key: "",
                             aligin: 'center',
                         },
@@ -893,8 +899,24 @@ export default {
         Spin
     },
     methods: {
+        //计算总数
+        countSun(){
+            console.log(this.certificatesList)
+            setTimeout(()=>{
+                if(this.certificatesList.length>0){
+                    this.certificatesList.forEach((val,index)=>{
+                        this.count =parseInt(val.qty)+this.count
+                    })
+                    this.addProductionTask.qty = this.count
+                }
+            },500)
+        },
         //发送
         okOutgoing(){
+            this.outgoingCertificatesList.forEach(val=>{
+                val.moCode = this.outgoingProductionTask.moCode;
+                val.moId = this.outgoingProductionTask.id;
+            })
             this.outgoing = true;
             this.$nextTick(()=> {
                 this.outgoing = false
@@ -909,8 +931,9 @@ export default {
                     })
                 })
             })
-            this.editInfo.jsonString = JSON.stringify(this.outgoingProductionTask);
+            this.editInfo.jsonString = JSON.stringify(this.outgoingCertificatesList);
                 modity(this.editInfo).then( res => {
+                    this.searchBtn()
             })
         },
         // 查看
@@ -960,6 +983,7 @@ export default {
             // })
         },
         addCertificatesEdit(){
+            this.countSun();
             this.certificatesList.push({
                 "bzQty": "",
                 "color": "",
@@ -1003,8 +1027,16 @@ export default {
             });
         },
         handleRemove(index){
-            if(index>0){
+            // this.addProductionTask.qty=0
+            if(this.certificatesList.length>1){
                 this.certificatesList.splice(index,1)
+                let deleCount = 0;
+                if(this.certificatesList.length){
+                    this.certificatesList.forEach(val=>{
+                        deleCount +=parseInt(val.qty)
+                    })
+                    this.addProductionTask.qty = deleCount
+                }
             }
         },
         editHandleRemove(index,id){
@@ -1075,6 +1107,7 @@ export default {
         },
         //编辑
         edit (row,index) {  
+            this.addProductionTask.qty=0
             this.editInfo.ids=[]; 
             this.searchalls.moCode = row.moCode
             this.editor=true
@@ -1200,13 +1233,13 @@ export default {
         headers(){
             let jwtToken = Storage.get("token");
             return { Authorization:jwtToken }; 
-        }
+        },
     },
     mounted(){
-       this.searchBtn()
-       userList().then(res =>{
-           this.constomer = res.data.content
-       })
+        this.searchBtn()
+        userList().then(res =>{
+           this.constomer = (res.data.content);
+        })
     }
 }
 </script>
