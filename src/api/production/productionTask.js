@@ -37,4 +37,4 @@ export const modifyProductionTask = (data) => {return axios.put("/api/dcMoDetail
 export const deleteProduction = (id) => {return axios.delete(`/api/dcMoDetail/${id}`).then(res => res.data)}
 
 //生产任务单色码数量详表API（任务编辑）
-export const modity = (data) => {return axios.put(`api/dcMoDetail/moidty?${qs.stringify(data)}`).then(res => res.data)}
+export const modity = (data) => {return axios.put(`api/dcMoDetail/moidty?${qs.stringify(data,{arrayFormat:"repeat"})}`).then(res => res.data)}
