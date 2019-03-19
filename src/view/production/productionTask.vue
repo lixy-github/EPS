@@ -143,7 +143,7 @@
                         </div>
                     </FormItem>
                 </Form>
-                <Spin ref="Aloadding"></Spin>
+                <!-- <Spin ref="Aloadding"></Spin> -->
             </div>
 
             <div slot="footer">
@@ -348,7 +348,7 @@
                             <Option value="包">包</Option>
                         </Select>
                     </FormItem>
-                    <FormItem label="备注说明" prop="memo" style="width:351px">
+                    <FormItem label="备注说明" prop="memo" style="width:758px">
                         <Input type="textarea" :autosize="{minRows: 2,maxRows: 8}" v-model="outgoingProductionTask.memo"/>
                     </FormItem>
                 </Form>
@@ -383,7 +383,7 @@
                             <Button type="primary" @click="outgoingHandleRemove(index,item.id)">删除</Button>
                     </FormItem>
                 </Form>
-                <Spin ref="Aloadding"></Spin>
+                <Spin ref="outgoingAloadding"></Spin>
             </div>
             <div slot="footer">
                 <Button type="dashed" style="margin-left:119px" @click="outgoingCertificates()" icon="md-add">添加</Button>
@@ -422,6 +422,7 @@
            <div style="margin-top:20px">
                <Table :columns="lookProduction" :data="data10" border></Table>
            </div>
+           <Spin ref="lookAloadding"></Spin>
         </Drawer>  
 
         <!-- 显示的表格 -->
@@ -482,13 +483,10 @@ export default {
             count:0,
             data10:[],
             viewContent:{},
+            search:{
+                moCode:"",
+            },
             lookProduction:[
-                {
-                    title:'序号',
-                    align:'center',
-                    key:"color",
-                    type:"index"
-                },
                 {
                     title:'颜色',
                     align:'center',
@@ -499,7 +497,7 @@ export default {
                     title:'尺码',
                     width:"70px",
                     align:'center',
-                    key:"sizes"
+                    key:"size"
                 },
                 {
                     title:'计划数',
@@ -901,7 +899,6 @@ export default {
     methods: {
         //计算总数
         countSun(){
-            console.log(this.certificatesList)
             setTimeout(()=>{
                 if(this.certificatesList.length>0){
                     this.certificatesList.forEach((val,index)=>{
@@ -927,7 +924,9 @@ export default {
                     this.outgoingProductionTask.qty+=parseInt(val.qty)
                     val.moCode=this.outgoingProductionTask.moCode;
                     val.moId=res.data.id
+                    val.id="";
                     AdddcMoDetail(val).then((res) => {
+                        
                     })
                 })
             })
@@ -938,13 +937,26 @@ export default {
         },
         // 查看
         toView(row){
+            this.$refs.lookAloadding.toggleSpin = true
             this.data10 = [];
             this.view=true;
             this.searchalls.moCode = row.moCode;
             productiontasksFindall(this.searchalls).then(res => {
                 res.data.content[0].procedures = JSON.parse(res.data.content[0].procedures).join("/")
-                this.viewContent=res.data.content[0];
-                this.data10.push(res.data.content[0])
+                 this.constomer.forEach(val => {
+                    if(val.id ==  res.data.content[0].custom){
+                        res.data.content[0].custom = val.username
+                    }
+                })
+                //获取表格数据
+                this.viewContent=res.data.content[0];  
+                this.search.moCode = row.moCode;
+                outgoingEdit(this.search).then(res => {
+                    res.data.content.forEach(val => {
+                        this.data10.push(val)
+                    })
+                    this.$refs.lookAloadding.toggleSpin = false
+                })          
             })
         },
         // 外发按钮
@@ -952,17 +964,20 @@ export default {
             // this.constomer.forEach(val => {
             //     this.outgoingCertificatesList.push(val)
             // })
+            this.$refs.outgoingAloadding.toggleSpin = true
             this.outgoing=true
             this.searchalls.moCode = row.moCode
             productiontasksFindall(this.searchalls).then((res) => {
-                    res.data.content[0].procedures = JSON.parse(res.data.content[0].procedures) 
-                    this.outgoingProductionTask=res.data.content[0] 
-                })
-            this.detailChecklist.moCode = row.moCode
-            TaskdetailChecklist(this.detailChecklist).then((res) => {
-                this.outgoingCertificatesList = []
-                res.data.content.forEach(val => {
-                    this.outgoingCertificatesList.push(val)
+                res.data.content[0].procedures = JSON.parse(res.data.content[0].procedures) 
+                this.outgoingProductionTask=res.data.content[0] 
+                //获取尾部
+                this.detailChecklist.moCode = row.moCode
+                TaskdetailChecklist(this.detailChecklist).then((res) => {
+                    this.outgoingCertificatesList = []
+                    res.data.content.forEach(val => {
+                        this.outgoingCertificatesList.push(val)
+                    })
+                    this.$refs.outgoingAloadding.toggleSpin = false
                 })
             })
         },
@@ -1115,14 +1130,15 @@ export default {
             productiontasksFindall(this.searchalls).then((res) => {
                 res.data.content[0].procedures=JSON.parse(res.data.content[0].procedures)
                 this.editorProductionTask=res.data.content[0];
-                this.$refs.Aloadding.toggleSpin=false
-            })
-            this.detailChecklist.moCode = row.moCode
-            TaskdetailChecklist(this.detailChecklist).then((res) => {
+                //获取尾部数据
+                this.detailChecklist.moCode = row.moCode
+                TaskdetailChecklist(this.detailChecklist).then((res) => {
                 this.Tasklist = res.data.content;
                 this.editCertificatesList = []
                 res.data.content.forEach(val => {
                     this.editCertificatesList.push(val)
+                    })
+                this.$refs.Aloadding.toggleSpin=false    
                 })
             })
         },
@@ -1143,13 +1159,13 @@ export default {
                         this.editorProductionTask.qty+=parseInt(val.qty);
                     })
                     productionTaskEdit(this.editorProductionTask).then((res) =>{
-                        this.$Message.info('修改成功')
-                        this.editor=false
-                        this.searchBtn()
-                    })
-                    
-                    this.editInfo.jsonString = JSON.stringify(this.editCertificatesList);
-                    modity(this.editInfo).then( res => {
+                        //尾部修改
+                         this.editInfo.jsonString = JSON.stringify(this.editCertificatesList);
+                            modity(this.editInfo).then( res => {
+                                this.$Message.info('修改成功')
+                                this.editor=false
+                                this.searchBtn() 
+                        })
                     })
                 }else{
                     this.$Message.error('请正确填写信息')

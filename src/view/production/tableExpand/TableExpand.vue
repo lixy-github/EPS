@@ -125,8 +125,8 @@
               @click="editHandleRemove(index,item.id)"
             >删除</Button>
           </FormItem>
+          <Spin ref="Outsourcingtasks"></Spin>
         </Form>
-        <!-- <Spin ref="Aloadding"></Spin> -->
       </div>
 
       <div slot="footer">
@@ -150,6 +150,7 @@
 <script>
 import axios from "../../../libs/AxiosPlugin";
 import Storage from "../../../libs/Storage";
+import Spin from '../../spin/spin'
 import {
   deleteProduction,
   productiontasksFindall,
@@ -370,6 +371,7 @@ export default {
       });
     },
     edit(row) {
+      this.$refs.Outsourcingtasks.toggleSpin = true
       this.editor = true;
       this.searchalls.moCode = row.moCode;
       productiontasksFindall(this.searchalls).then(res => {
