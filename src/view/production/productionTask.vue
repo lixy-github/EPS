@@ -325,15 +325,13 @@
           :model="outgoingProductionTask"
           :rules="productionRules"
           :label-width="100"
-          inline
-        >
+          inline>
           <!-- 上传照片 -->
           <FormItem label="照片" prop="photo">
             <div
               class="demo-upload-list"
               v-if="this.outgoingProductionTask.photo && this.outgoingProductionTask.photo!=''"
-              :key="1"
-            >
+              :key="1">
               <img :src="uploadAction+this.outgoingProductionTask.photo">
             </div>
             <Upload
@@ -471,8 +469,7 @@
       fullscreen
       title="查看外发任务"
       @on-ok="ok"
-      @on-cancel="cancel"
-    >
+      @on-cancel="cancel">
       <div>
         <img style="width:200px;height:200px" :src="uploadAction+this.viewContent.photo">
       </div>

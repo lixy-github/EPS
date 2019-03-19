@@ -30,7 +30,7 @@ export const AdddcMoDetail = (data) => {return axios.post("/api/dcMoDetail",data
 //生产任务单色码数量详表API （任务详情关联单）
 export const TaskdetailChecklist = (params) => {return axios.get(`api/dcMoDetail/searchall?${qs.stringify(params)}`).then(res => res.data)}
 
-//生产任务单色码数量详表API（修改生产任务）
+//生产任务单色码数量详表API（修改生产任务详情）
 export const modifyProductionTask = (data) => {return axios.put("/api/dcMoDetail",data).then(res => res.data)}
 
 //生产任务单色码数量详表API（删除生产任务详情）

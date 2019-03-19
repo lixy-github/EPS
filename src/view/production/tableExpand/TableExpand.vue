@@ -130,7 +130,7 @@
       </div>
 
       <div slot="footer">
-        <Button type="dashed" style="margin-left:119px" @click="addCertificates()" icon="md-add">添加</Button>
+        <!-- <Button type="dashed" style="margin-left:119px" @click="addCertificates()" icon="md-add">添加</Button> -->
         <Button @click="cancel">取消</Button>
         <Button type="success" @click="okList">修改</Button>
       </div>
@@ -159,7 +159,8 @@ import {
   userList,
   AdddcMoDetail,
   modityUpdate,
-  productionTasks
+  productionTasks,
+  modifyProductionTask
 } from "../../../api/production/productionTask.js";
 export default {
   props: {
@@ -329,10 +330,10 @@ export default {
     },
     //修改确定
     okList() {
-      this.editCertificatesList.forEach(val=>{
-            val.moCode = this.editorProductionTask.moCode;
-            val.moId = this.editorProductionTask.id;
-        })
+      // this.editCertificatesList.forEach(val=>{
+      //       val.moCode = this.editorProductionTask.moCode;
+      //       val.moId = this.editorProductionTask.id;
+      //   })
       this.editor = true;
       this.$nextTick(() => {
         this.editor = false;
@@ -345,27 +346,27 @@ export default {
           this.editorProductionTask.qty += parseInt(val.qty);
           val.moCode = this.editorProductionTask.moCode;
           val.moId = res.data.id;
-          // AdddcMoDetail(val).then(res => {});
+          modifyProductionTask(val).then(res => {});
         });
       });
-      this.editInfo.jsonString = JSON.stringify(this.editCertificatesList);
-      modityUpdate(this.editInfo).then(res => {});
+      // this.editInfo.jsonString = JSON.stringify(this.editCertificatesList);
+      // modityUpdate(this.editInfo).then(res => {});
     },
     //添加尾部
-    addCertificates() {
-      this.editCertificatesList.push({
-        bzQty: "",
-        color: "",
-        fzQty: "",
-        hjQty: "",
-        qty: "",
-        size: "",
-        tjQty: "",
-        ztQty: "",
-        moCode: "",
-        moId: ""
-      });
-    },
+    // addCertificates() {
+    //   this.editCertificatesList.push({
+    //     bzQty: "",
+    //     color: "",
+    //     fzQty: "",
+    //     hjQty: "",
+    //     qty: "",
+    //     size: "",
+    //     tjQty: "",
+    //     ztQty: "",
+    //     moCode: "",
+    //     moId: ""
+    //   });
+    // },
     //删除尾部
     editHandleRemove(index, id) {
       if (id) {
