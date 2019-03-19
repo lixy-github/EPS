@@ -762,8 +762,9 @@ export default {
                     render: (h, params) => {
                         return h(TableExpand, {
                             props: {
-                                row: params.row
-                            }
+                                row: params.row,
+                                // searchBtn: this.searchBtn
+                            },
                         })
                     }
                 },

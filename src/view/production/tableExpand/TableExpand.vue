@@ -125,8 +125,8 @@
               @click="editHandleRemove(index,item.id)"
             >删除</Button>
           </FormItem>
-          <Spin ref="Outsourcingtasks"></Spin>
         </Form>
+        <Spin ref="Outsourcingtasks"></Spin>
       </div>
 
       <div slot="footer">
@@ -163,7 +163,8 @@ import {
 } from "../../../api/production/productionTask.js";
 export default {
   props: {
-    row: Object
+    row: Object,
+    searchBtn: Function
   },
   data() {
     return {
@@ -313,6 +314,19 @@ export default {
     };
   },
   methods: {
+    // 表格数据
+    getTableData() {
+      let aaa = [];
+      this.search.moCode = this.row.moCode;
+      outgoingEdit(this.search).then(res => {
+        res.data.content.forEach(val => {
+          val.deliveryData = this.row.deliveryData;
+          // val.outgoingId = 'admin'
+          aaa.push(val);
+        });
+      });
+      this.dataTable = aaa;
+    },
     //修改确定
     okList() {
       this.editCertificatesList.forEach(val=>{
@@ -361,12 +375,16 @@ export default {
         this.editCertificatesList.splice(index, 1);
       }
     },
+    //删除数据
     remove(row, index) {
       this.$Modal.confirm({
         title: "删除",
         content: "<p>确定要删除这条记录吗？</p>",
         onOk: () => {
-          deleteProduction(row.id).then(res => {});
+          // this.searchBtn()
+          deleteProduction(row.id).then(res => {
+            this.getTableData();
+          });
         }
       });
     },
@@ -397,16 +415,7 @@ export default {
     userList().then(res => {
       this.constomer = res.data.content;
     });
-    let aaa = [];
-    this.search.moCode = this.row.moCode;
-    outgoingEdit(this.search).then(res => {
-      res.data.content.forEach(val => {
-        val.deliveryData = this.row.deliveryData;
-        // val.outgoingId = 'admin'
-        aaa.push(val);
-      });
-    });
-    this.dataTable = aaa;
+    this.getTableData();
   }
 };
 </script>
