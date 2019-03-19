@@ -59,7 +59,7 @@
             <Input v-model="editorProductionTask.pins" disabled/>
           </FormItem>
           <FormItem label="合同交期" prop="deliveryData" style="width:240px">
-            <DatePicker type="date" v-model="editorProductionTask.deliveryData"></DatePicker>
+            <DatePicker  type="datetime" v-model="editorProductionTask.deliveryData"></DatePicker>
           </FormItem>
           <FormItem label="工序" prop="procedures" style="min-width:240px">
             <Select v-model="editorProductionTask.procedures" multiple>
@@ -158,7 +158,7 @@ import {
   outgoingEdit,
   userList,
   AdddcMoDetail,
-  modity,
+  modityUpdate,
   productionTasks
 } from "../../../api/production/productionTask.js";
 export default {
@@ -345,11 +345,11 @@ export default {
           this.editorProductionTask.qty += parseInt(val.qty);
           val.moCode = this.editorProductionTask.moCode;
           val.moId = res.data.id;
-          AdddcMoDetail(val).then(res => {});
+          // AdddcMoDetail(val).then(res => {});
         });
       });
       this.editInfo.jsonString = JSON.stringify(this.editCertificatesList);
-      modity(this.editInfo).then(res => {});
+      modityUpdate(this.editInfo).then(res => {});
     },
     //添加尾部
     addCertificates() {
@@ -388,6 +388,7 @@ export default {
         }
       });
     },
+    //编辑
     edit(row) {
       this.$refs.Outsourcingtasks.toggleSpin = true
       this.editor = true;

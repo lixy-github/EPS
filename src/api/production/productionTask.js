@@ -41,3 +41,6 @@ export const modity = (data) => {return axios.put(`api/dcMoDetail/moidty?${qs.st
 
 //生产任务单色码数量详表API（外发编辑列表）
 export const outgoingEdit = (data) => {return axios.get(`api/dcMoDetail/searwaifa?${qs.stringify(data)}`).then(res => res.data)}
+
+//生产任务单色码数量详表API（外发编辑）
+export const modityUpdate = (data) => {return axios.put(`api/dcMoDetail/update?${qs.stringify(data,{arrayFormat:"repeat"})}`).then(res => res.data)}
