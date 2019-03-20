@@ -360,8 +360,8 @@
             <Input v-model="outgoingProductionTask.product" disabled/>
           </FormItem>
           <div style="margin-top: -127px;margin-left: 263px;">
-            <FormItem label="客户名称" prop="custom" style="width:240px">
-              <Select v-model="outgoingProductionTask.custom" filterable>
+            <FormItem label="客户名称" prop="custom" style="width:240px" >
+              <Select v-model="outgoingProductionTask.custom" filterable disabled>
                 <Option
                   v-for="item in this.constomer"
                   :value="item.id"
@@ -410,12 +410,10 @@
             />
           </FormItem>
         </Form>
-        <Divider id="titleStyle">生产任务详情</Divider>
+        <Divider id="titleStyle">外发任务</Divider>
         <!-- 生产任务数量详情 -->
-        <Form :label-width="80" inline>
-          <div
-            style="display:flex;justify-content:space-around;width:593px;font-size:13px;margin-bottom:7px;margin-left: 124px;"
-          >
+        <!-- <Form :label-width="80" inline>
+          <div style="display:flex;justify-content:space-around;width:593px;font-size:13px;margin-bottom:7px;margin-left: 124px;">
             <div>外加工单位</div>
             <div style="margin-left:30px">颜色</div>
             <div>尺码</div>
@@ -446,16 +444,56 @@
             </FormItem>
             <Button type="primary" @click="outgoingHandleRemove(index,item.id)">删除</Button>
           </FormItem>
-        </Form>
+        </Form> -->
+        <Table :columns="outgoingColumns" :data="outgoingCertificatesList" @on-selection-change="selectTouch">
+            <!-- 外加工单位 -->
+            <template slot-scope="{ row, index }" slot="cid">
+                <Select style="width:150px" v-model="outgoingCertificatesList[index].cid"> 
+                  <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
+                </Select>
+            </template>
+            <!-- 工序 -->
+            <template slot-scope="{row, index }" slot="procedures">
+              <Select  multiple style="width:100px" v-model="rtyuioppn">
+                <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
+              </Select>
+            </template>
+            <!-- 颜色 -->
+            <template slot-scope="{ row, index }" slot="color">
+              <Select v-model="outgoingCertificatesList[index].color" style="width:65px">
+                <Option  v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
+              </Select>
+            </template>
+            <!-- 尺码 -->
+            <template slot-scope="{ row, index }" slot="size">
+              <!-- <Input type="text" v-model="row.size" /> -->
+              <Select v-model="outgoingCertificatesList[index].size" style="width:60px">
+                <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
+              </Select>
+            </template>
+            <!-- 数量 -->
+            <template slot-scope="{ row, index }" slot="qty">
+              <Input style="width:60px" type="text" v-model="outgoingCertificatesList[index].qty"/>
+            </template>
+            <!-- 合同交期 -->
+            <template slot-scope="{ row, index }" slot="deliveryData">
+              <DatePicker style="width:155px" type="datetime" v-model="outgoingCertificatesList[index].deliveryData"></DatePicker>
+            </template>
+            <!-- 操作 -->
+            <template slot-scope="{ row,index }" slot="action">
+              <Button @click="addOutgoingClik(row,index)">增加</Button>
+              <Button @click="deleteOutgoingClik(row,index)">删除</Button>
+            </template>
+        </Table>
         <Spin ref="outgoingAloadding"></Spin>
       </div>
       <div slot="footer">
-        <Button
+        <!-- <Button
           type="dashed"
           style="margin-left:119px"
           @click="outgoingCertificates()"
           icon="md-add"
-        >添加</Button>
+        >添加</Button> -->
         <Button @click="cancel">取消</Button>
         <Button @click="okOutgoing" type="success">发送</Button>
       </div>
@@ -583,12 +621,64 @@ export default {
       }
     };
     return {
+      selectData:[],
+      editIndex: -1,
       count: 0,
       data10: [],
       viewContent: {},
       search: {
         moCode: ""
       },
+      outgoingColumns: [
+         {
+          width:"44px",
+          slot: 'selectAddition',
+          align:'center',
+          type: 'selection'
+        },
+        {
+          width:"170px",
+          title: '外加工单位',
+          align:'center',
+          slot: 'cid',
+        },
+        {
+          title: '工序',
+          align:'center',
+          width:'120px',
+          slot: 'procedures',
+        },
+        {
+          title: '颜色',
+          align:'center',
+          slot: 'color',
+          width:"83px"
+        },
+        {
+          title: '尺码',
+          align:'center',
+          slot: 'size',
+          width:"78px"
+        },
+        {
+          title: '数量',
+          align:'center',
+          slot: 'qty',
+          width:"78px"
+        },
+        {
+          title: '合同交期',
+          align:'center',
+          width:'175px',
+          slot: 'deliveryData',
+        },
+        {
+          title: '操作',
+          align:'center',
+          slot: 'action',
+          width: "160px"
+        },
+      ],
       lookProduction: [
         {
           title: "颜色",
@@ -755,7 +845,9 @@ export default {
           tjQty: "",
           ztQty: "",
           moCode: "",
-          outgoingId: ""
+          outgoingId: "",
+          procedures:"",
+          deliveryData:"",
         }
       ],
       Process: [
@@ -993,6 +1085,21 @@ export default {
     Spin
   },
   methods: {
+    // 发送页面选择按钮
+    selectTouch(selection){
+      console.log(selection)
+      this.selectData = selection
+    },
+    //发送页面添加按钮
+    addOutgoingClik(row,index){
+      this.outgoingCertificatesList.push(row)
+    },
+    //发送页面删除按钮
+    deleteOutgoingClik(row,index){
+      if(this.outgoingCertificatesList.length>1){
+        this.outgoingCertificatesList.splice(index, 1);
+      }
+    },
     //发送
     okOutgoing() {
       this.outgoingCertificatesList.forEach(val => {
@@ -1019,6 +1126,7 @@ export default {
       });
       this.editInfo.jsonString = JSON.stringify(this.outgoingCertificatesList);
       modityUpdate(this.editInfo).then(res => {
+        this.editInfo.ids=[];
         this.searchBtn();
       });
     },
@@ -1062,12 +1170,29 @@ export default {
         );
         this.outgoingProductionTask = res.data.content[0];
         //获取尾部
-        this.detailChecklist.moCode = row.moCode;
+        this.detailChecklist.id = row.id;
         TaskdetailChecklist(this.detailChecklist).then(res => {
-          this.outgoingCertificatesList = [];
-          res.data.content.forEach(val => {
-            this.outgoingCertificatesList.push(val);
-          });
+          // this.outgoingCertificatesList = [];
+          // res.data.content.forEach( val => {
+          //   val.procedures = JSON.parse(val.procedures)
+          // });
+          // console.log(res.data.content)
+          // this.outgoingCertificatesList = [
+          //    {
+          //      bzqty: null,
+          //       cid: 2,
+          //       color: "藏青",
+          //       deliveryData: "2019-03-18 04:05:06",
+          //       id: 22,
+          //       moCode: "生产单号",
+          //       moId: 3,
+          //       procedures: '["套口"]',
+          //       qty: 13,
+          //       size: "M"
+          //    },
+          //  ]
+          this.outgoingCertificatesList = res.data.content;
+          // console.log(this.outgoingCertificatesList)
           this.$refs.outgoingAloadding.toggleSpin = false;
         });
       });
@@ -1260,6 +1385,7 @@ export default {
             modity(this.editInfo).then(res => {
               this.$Message.info("修改成功");
               this.editor = false;
+              this.editInfo.ids=[];
               this.searchBtn();
             });
           });
@@ -1349,6 +1475,27 @@ export default {
     headers() {
       let jwtToken = Storage.get("token");
       return { Authorization: jwtToken };
+    },
+    rtyuioppn: {
+      get: function() {
+        let aaaaaaaa = [];
+        if (this.outgoingCertificatesList&&this.outgoingCertificatesList.length) {
+          aaaaaaaa = this.outgoingCertificatesList[0].procedures.slice(0, this.outgoingCertificatesList[0].procedures.length)
+          console.log(1)
+          console.log(aaaaaaaa)
+          console.log(typeof this.outgoingCertificatesList[0].procedures)
+        }
+        return aaaaaaaa
+      },
+      set: function() {
+        let aaaaaaaa = [];
+        if (this.outgoingCertificatesList&&this.outgoingCertificatesList.length) {
+          aaaaaaaa = this.outgoingCertificatesList[0].procedures.slice(0, this.outgoingCertificatesList[0].procedures.length)
+          console.log(2)
+          console.log(this.outgoingCertificatesList[0].procedures)
+        }
+        return aaaaaaaa
+      }
     }
   },
   mounted() {

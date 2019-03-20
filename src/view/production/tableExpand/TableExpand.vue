@@ -160,7 +160,7 @@ import {
   AdddcMoDetail,
   modityUpdate,
   productionTasks,
-  modifyProductionTask
+  modifyProductionTask,
 } from "../../../api/production/productionTask.js";
 export default {
   props: {
@@ -342,15 +342,16 @@ export default {
         this.editorProductionTask.procedures
       );
       productionTasks(this.editorProductionTask).then(res => {
+        //修改尾部
         this.editCertificatesList.forEach(val => {
           this.editorProductionTask.qty += parseInt(val.qty);
           val.moCode = this.editorProductionTask.moCode;
           val.moId = res.data.id;
-          modifyProductionTask(val).then(res => {});
+          // AdddcMoDetail(val).then(res => {});
         });
       });
-      // this.editInfo.jsonString = JSON.stringify(this.editCertificatesList);
-      // modityUpdate(this.editInfo).then(res => {});
+      this.editInfo.jsonString = JSON.stringify(this.editCertificatesList);
+      modityUpdate(this.editInfo).then(res => {});
     },
     //添加尾部
     // addCertificates() {
