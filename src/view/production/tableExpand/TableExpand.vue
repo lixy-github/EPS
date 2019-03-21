@@ -140,6 +140,7 @@
         <template slot-scope="{row, index}" slot="action">
           <div>
             <Icon type="ios-create-outline" size="20" @click="edit(row,index)"/>
+            <Icon type="ios-eye-outline" size="20" @click="openToview"/>
             <Icon type="ios-trash-outline" size="20" @click="remove(row,index)"/>
           </div>
         </template>
@@ -165,7 +166,7 @@ import {
 export default {
   props: {
     row: Object,
-    searchBtn: Function
+    toView: Function
   },
   data() {
     return {
@@ -315,10 +316,13 @@ export default {
     };
   },
   methods: {
+    openToview(){
+      this.toView(this.row)
+    },
     // 表格数据
     getTableData() {
       let aaa = [];
-      this.search.moCode = this.row.moCode;
+      this.search.id = this.row.id;
       outgoingEdit(this.search).then(res => {
         res.data.content.forEach(val => {
           val.deliveryData = this.row.deliveryData;
@@ -383,7 +387,6 @@ export default {
         title: "删除",
         content: "<p>确定要删除这条记录吗？</p>",
         onOk: () => {
-          // this.searchBtn()
           deleteProduction(row.id).then(res => {
             this.getTableData();
           });

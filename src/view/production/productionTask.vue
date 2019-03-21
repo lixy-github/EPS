@@ -446,17 +446,19 @@
           </FormItem>
         </Form> -->
         <Table :columns="outgoingColumns" :data="outgoingCertificatesList" @on-selection-change="selectTouch">
-            <!-- 外加工单位 -->
-            <template slot-scope="{ row, index }" slot="cid">
+             <template slot-scope="{ row, index }" slot="cid">
                 <Select style="width:150px" v-model="outgoingCertificatesList[index].cid"> 
                   <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
                 </Select>
             </template>
             <!-- 工序 -->
             <template slot-scope="{row, index }" slot="procedures">
-              <Select  multiple style="width:100px" v-model="rtyuioppn">
-                <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
-              </Select>
+              <CheckboxGroup v-model="outgoingCertificatesList[index].procedures">
+                  <Checkbox label="横机"></Checkbox>
+                  <Checkbox label="套口"></Checkbox>
+                  <Checkbox label="洗整"></Checkbox>
+                  <Checkbox label="包装"></Checkbox>
+              </CheckboxGroup>
             </template>
             <!-- 颜色 -->
             <template slot-scope="{ row, index }" slot="color">
@@ -466,7 +468,6 @@
             </template>
             <!-- 尺码 -->
             <template slot-scope="{ row, index }" slot="size">
-              <!-- <Input type="text" v-model="row.size" /> -->
               <Select v-model="outgoingCertificatesList[index].size" style="width:60px">
                 <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
               </Select>
@@ -477,7 +478,7 @@
             </template>
             <!-- 合同交期 -->
             <template slot-scope="{ row, index }" slot="deliveryData">
-              <DatePicker style="width:155px" type="datetime" v-model="outgoingCertificatesList[index].deliveryData"></DatePicker>
+              <DatePicker style="width:127px" type="datetime" v-model="outgoingCertificatesList[index].deliveryData"></DatePicker>
             </template>
             <!-- 操作 -->
             <template slot-scope="{ row,index }" slot="action">
@@ -488,12 +489,6 @@
         <Spin ref="outgoingAloadding"></Spin>
       </div>
       <div slot="footer">
-        <!-- <Button
-          type="dashed"
-          style="margin-left:119px"
-          @click="outgoingCertificates()"
-          icon="md-add"
-        >添加</Button> -->
         <Button @click="cancel">取消</Button>
         <Button @click="okOutgoing" type="success">发送</Button>
       </div>
@@ -629,10 +624,10 @@ export default {
       search: {
         moCode: ""
       },
+      asdasd: [],
       outgoingColumns: [
          {
           width:"44px",
-          slot: 'selectAddition',
           align:'center',
           type: 'selection'
         },
@@ -645,8 +640,8 @@ export default {
         {
           title: '工序',
           align:'center',
-          width:'120px',
-          slot: 'procedures',
+          width:'148px',
+          slot: 'procedures'
         },
         {
           title: '颜色',
@@ -669,7 +664,7 @@ export default {
         {
           title: '合同交期',
           align:'center',
-          width:'175px',
+          width:'147px',
           slot: 'deliveryData',
         },
         {
@@ -846,7 +841,7 @@ export default {
           ztQty: "",
           moCode: "",
           outgoingId: "",
-          procedures:"",
+          procedures:[],
           deliveryData:"",
         }
       ],
@@ -863,7 +858,6 @@ export default {
           value: "洗整",
           label: "洗整"
         },
-
         {
           value: "包装",
           label: "包装"
@@ -949,8 +943,8 @@ export default {
           render: (h, params) => {
             return h(TableExpand, {
               props: {
-                row: params.row
-                // searchBtn: this.searchBtn
+                row: params.row,
+                toView: this.toView
               }
             });
           }
@@ -1026,7 +1020,7 @@ export default {
           align: "center",
           ellipsis: true,
           render: (h, params) => {
-            return h("span", JSON.parse(params.row.procedures).join(","));
+            // return h("span", JSON.parse(params.row.procedures).join(","));
           }
         },
         {
@@ -1077,7 +1071,8 @@ export default {
           value: "藏青",
           label: "藏青"
         }
-      ]
+      ],
+      tsaaa: []
     };
   },
   components: {
@@ -1087,7 +1082,6 @@ export default {
   methods: {
     // 发送页面选择按钮
     selectTouch(selection){
-      console.log(selection)
       this.selectData = selection
     },
     //发送页面添加按钮
@@ -1102,7 +1096,7 @@ export default {
     },
     //发送
     okOutgoing() {
-      this.outgoingCertificatesList.forEach(val => {
+      this.selectData.forEach(val => {
         val.moCode = this.outgoingProductionTask.moCode;
         val.moId = this.outgoingProductionTask.id;
       });
@@ -1110,24 +1104,23 @@ export default {
       this.$nextTick(() => {
         this.outgoing = false;
       });
-      this.outgoingProductionTask.procedures = JSON.stringify(
-        this.outgoingProductionTask.procedures
-      );
+      this.outgoingProductionTask.procedures = this.outgoingProductionTask.procedures.join(",")
       productionTasks(this.outgoingProductionTask).then(res => {
-        this.outgoingCertificatesList.forEach(val => {
+        this.selectData.forEach(val => {
+          val.procedures = val.procedures.join(",")
+          delete val.id
           this.outgoingProductionTask.qty += parseInt(val.qty);
           val.moCode = this.outgoingProductionTask.moCode;
           val.moId = res.data.id;
-          // val.id="";
-          // AdddcMoDetail(val).then((res) => {
-
-          // })
+          
         });
-      });
-      this.editInfo.jsonString = JSON.stringify(this.outgoingCertificatesList);
-      modityUpdate(this.editInfo).then(res => {
-        this.editInfo.ids=[];
-        this.searchBtn();
+        console.log(this.selectData)
+        // 尾部
+          this.editInfo.jsonString = JSON.stringify(this.selectData);
+          modityUpdate(this.editInfo).then(res => {
+            this.editInfo.ids=[];
+            this.searchBtn();
+          });
       });
     },
     // 查看
@@ -1158,41 +1151,26 @@ export default {
     },
     // 外发按钮
     outgoinghanldclick(row) {
-      // this.constomer.forEach(val => {
-      //     this.outgoingCertificatesList.push(val)
-      // })
       this.$refs.outgoingAloadding.toggleSpin = true;
       this.outgoing = true;
-      this.searchalls.moCode = row.moCode;
+      this.searchalls.id = row.id;
       productiontasksFindall(this.searchalls).then(res => {
-        res.data.content[0].procedures = JSON.parse(
-          res.data.content[0].procedures
-        );
-        this.outgoingProductionTask = res.data.content[0];
+        let arr = [];
+        arr.push(res.data.content[0])
+        arr[0].procedures = arr[0].procedures.split(",");
+        this.outgoingProductionTask = arr[0]
+        // res.data.content[0].procedures = JSON.parse(
+        //   res.data.content[0].procedures
+        // );
+        // this.outgoingProductionTask = res.data.content[0];
         //获取尾部
         this.detailChecklist.id = row.id;
         TaskdetailChecklist(this.detailChecklist).then(res => {
-          // this.outgoingCertificatesList = [];
-          // res.data.content.forEach( val => {
-          //   val.procedures = JSON.parse(val.procedures)
-          // });
-          // console.log(res.data.content)
-          // this.outgoingCertificatesList = [
-          //    {
-          //      bzqty: null,
-          //       cid: 2,
-          //       color: "藏青",
-          //       deliveryData: "2019-03-18 04:05:06",
-          //       id: 22,
-          //       moCode: "生产单号",
-          //       moId: 3,
-          //       procedures: '["套口"]',
-          //       qty: 13,
-          //       size: "M"
-          //    },
-          //  ]
+          this.outgoingCertificatesList = [];
+          res.data.content.forEach( val => {
+            val.procedures = val.procedures.split(",")
+          });
           this.outgoingCertificatesList = res.data.content;
-          // console.log(this.outgoingCertificatesList)
           this.$refs.outgoingAloadding.toggleSpin = false;
         });
       });
@@ -1207,11 +1185,6 @@ export default {
           this.$Message.error("请填写正确信息");
         }
       });
-      // this.certificatesList.forEach(val =>{
-      //     productionTasks(val).then(res =>{
-      //         console.log(res)
-      //     })
-      // })
     },
     addCertificatesEdit() {
       this.certificatesList.push({
@@ -1343,12 +1316,10 @@ export default {
       this.editor = true;
       this.$refs.Aloadding.toggleSpin = true;
       productiontasksFindall(this.searchalls).then(res => {
-        res.data.content[0].procedures = JSON.parse(
-          res.data.content[0].procedures
-        );
+        res.data.content[0].procedures = res.data.content[0].procedures.split(",")
         this.editorProductionTask = res.data.content[0];
         //获取尾部数据
-        this.detailChecklist.moCode = row.moCode;
+        this.detailChecklist.id = row.id;
         TaskdetailChecklist(this.detailChecklist).then(res => {
           this.Tasklist = res.data.content;
           this.editCertificatesList = [];
@@ -1371,9 +1342,7 @@ export default {
       });
       this.$refs["editorProductionRef"].validate(valid => {
         if (valid) {
-          this.editorProductionTask.procedures = JSON.stringify(
-            this.editorProductionTask.procedures
-          );
+          this.editorProductionTask.procedures = this.editorProductionTask.procedures.join(",")
           this.editCertificatesList.forEach(val => {
             this.editorProductionTask.qty += parseInt(val.qty);
           });
@@ -1444,9 +1413,10 @@ export default {
         if (valid) {
           // let proceduresString = this.addProductionTask.procedure.join(',');
           // this.addProductionTask['procedures']=String(proceduresString)
-          this.addProductionTask.procedures = JSON.stringify(
-            this.addProductionTask.procedures
-          );
+          // this.addProductionTask.procedures = JSON.stringify(
+          //   this.addProductionTask.procedures
+          // );
+          this.addProductionTask.procedures = this.addProductionTask.procedures.join(',')
           productionTasks(this.addProductionTask).then(res => {
             this.dataTable = res.content;
             
@@ -1462,7 +1432,7 @@ export default {
             });
           }).catch(() => {
                 this.$refs.Aloadding.toggleSpin = false;
-            });;
+            });
         } else {
           this.$Message.error("请正确填写信息");
           this.$refs.Aloadding.toggleSpin = false;
@@ -1476,27 +1446,6 @@ export default {
       let jwtToken = Storage.get("token");
       return { Authorization: jwtToken };
     },
-    rtyuioppn: {
-      get: function() {
-        let aaaaaaaa = [];
-        if (this.outgoingCertificatesList&&this.outgoingCertificatesList.length) {
-          aaaaaaaa = this.outgoingCertificatesList[0].procedures.slice(0, this.outgoingCertificatesList[0].procedures.length)
-          console.log(1)
-          console.log(aaaaaaaa)
-          console.log(typeof this.outgoingCertificatesList[0].procedures)
-        }
-        return aaaaaaaa
-      },
-      set: function() {
-        let aaaaaaaa = [];
-        if (this.outgoingCertificatesList&&this.outgoingCertificatesList.length) {
-          aaaaaaaa = this.outgoingCertificatesList[0].procedures.slice(0, this.outgoingCertificatesList[0].procedures.length)
-          console.log(2)
-          console.log(this.outgoingCertificatesList[0].procedures)
-        }
-        return aaaaaaaa
-      }
-    }
   },
   mounted() {
     this.searchBtn();
