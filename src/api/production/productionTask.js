@@ -44,3 +44,7 @@ export const outgoingEdit = (data) => {return axios.get(`api/dcMoDetail/searwaif
 
 //生产任务单色码数量详表API（外发编辑）
 export const modityUpdate = (data) => {return axios.put(`api/dcMoDetail/update?${qs.stringify(data,{arrayFormat:"repeat"})}`).then(res => res.data)}
+
+//生产任务单色码数量详表API（外发单条编辑）
+
+export const searlist = (data) => {return axios.get(`api/dcMoDetail/searlist?${qs.stringify(data)}`).then(res => res.data)}

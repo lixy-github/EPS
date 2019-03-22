@@ -452,8 +452,8 @@
                 </Select>
             </template>
             <!-- 工序 -->
-            <template slot-scope="{row, index }" slot="procedures">
-              <CheckboxGroup v-model="outgoingCertificatesList[index].procedures">
+            <template slot-scope="{row, index }" slot="detailProcedures">
+              <CheckboxGroup v-model="outgoingCertificatesList[index].detailProcedures">
                   <Checkbox label="横机"></Checkbox>
                   <Checkbox label="套口"></Checkbox>
                   <Checkbox label="洗整"></Checkbox>
@@ -478,7 +478,7 @@
             </template>
             <!-- 合同交期 -->
             <template slot-scope="{ row, index }" slot="deliveryData">
-              <DatePicker style="width:127px" type="datetime" v-model="outgoingCertificatesList[index].deliveryData"></DatePicker>
+              <DatePicker style="width:127px" type="datetime" v-model="outgoingCertificatesList[index].detailDeliveryData"></DatePicker>
             </template>
             <!-- 操作 -->
             <template slot-scope="{ row,index }" slot="action">
@@ -626,7 +626,7 @@ export default {
       },
       asdasd: [],
       outgoingColumns: [
-         {
+        {
           width:"44px",
           align:'center',
           type: 'selection'
@@ -641,7 +641,7 @@ export default {
           title: '工序',
           align:'center',
           width:'148px',
-          slot: 'procedures'
+          slot: 'detailProcedures'
         },
         {
           title: '颜色',
@@ -813,7 +813,9 @@ export default {
           size: "",
           tjQty: "",
           ztQty: "",
-          moCode: ""
+          moCode: "",
+          detailDeliveryData: "",
+          detailProcedures: "",
         }
       ],
       editCertificatesList: [
@@ -1019,9 +1021,6 @@ export default {
           key: "procedures",
           align: "center",
           ellipsis: true,
-          render: (h, params) => {
-            // return h("span", JSON.parse(params.row.procedures).join(","));
-          }
         },
         {
           title: "完成率",
@@ -1107,14 +1106,14 @@ export default {
       this.outgoingProductionTask.procedures = this.outgoingProductionTask.procedures.join(",")
       productionTasks(this.outgoingProductionTask).then(res => {
         this.selectData.forEach(val => {
-          val.procedures = val.procedures.join(",")
+          val.detailProcedures = val.detailProcedures.join(",")
           delete val.id
+          delete val.procedures
+          delete val.deliveryData
           this.outgoingProductionTask.qty += parseInt(val.qty);
           val.moCode = this.outgoingProductionTask.moCode;
           val.moId = res.data.id;
-          
         });
-        console.log(this.selectData)
         // 尾部
           this.editInfo.jsonString = JSON.stringify(this.selectData);
           modityUpdate(this.editInfo).then(res => {
@@ -1130,9 +1129,7 @@ export default {
       this.view = true;
       this.searchalls.moCode = row.moCode;
       productiontasksFindall(this.searchalls).then(res => {
-        res.data.content[0].procedures = JSON.parse(
-          res.data.content[0].procedures
-        ).join("/");
+        res.data.content[0].procedures = res.data.content[0].procedures;
         this.constomer.forEach(val => {
           if (val.id == res.data.content[0].custom) {
             res.data.content[0].custom = val.username;
@@ -1140,7 +1137,7 @@ export default {
         });
         //获取表格数据
         this.viewContent = res.data.content[0];
-        this.search.moCode = row.moCode;
+        this.search.id = row.id;
         outgoingEdit(this.search).then(res => {
           res.data.content.forEach(val => {
             this.data10.push(val);
@@ -1159,33 +1156,30 @@ export default {
         arr.push(res.data.content[0])
         arr[0].procedures = arr[0].procedures.split(",");
         this.outgoingProductionTask = arr[0]
-        // res.data.content[0].procedures = JSON.parse(
-        //   res.data.content[0].procedures
-        // );
-        // this.outgoingProductionTask = res.data.content[0];
         //获取尾部
         this.detailChecklist.id = row.id;
         TaskdetailChecklist(this.detailChecklist).then(res => {
           this.outgoingCertificatesList = [];
           res.data.content.forEach( val => {
-            val.procedures = val.procedures.split(",")
+            val.detailProcedures = val.detailProcedures.split(",");
           });
+          console.log(res.data.content)
           this.outgoingCertificatesList = res.data.content;
           this.$refs.outgoingAloadding.toggleSpin = false;
         });
       });
     },
-    submit() {
-      this.$refs["productionRef"].validate(valid => {
-        if (valid) {
-          productionTasks(this.addProductionTask).then(res => {
-            this.value3 = false;
-          });
-        } else {
-          this.$Message.error("请填写正确信息");
-        }
-      });
-    },
+    // submit() {
+    //   this.$refs["productionRef"].validate(valid => {
+    //     if (valid) {
+    //       productionTasks(this.addProductionTask).then(res => {
+    //         this.value3 = false;
+    //       });
+    //     } else {
+    //       this.$Message.error("请填写正确信息");
+    //     }
+    //   });
+    // },
     addCertificatesEdit() {
       this.certificatesList.push({
         bzQty: "",
@@ -1197,7 +1191,9 @@ export default {
         tjQty: "",
         ztQty: "",
         moCode: "",
-        moId: ""
+        moId: "",
+        detailDeliveryData:"",
+        detailProcedures: "",
       });
     },
     addCertificates() {
@@ -1393,7 +1389,9 @@ export default {
           hjQty: "",
           tjQty: "",
           ztQty: "",
-          moCode: ""
+          moCode: "",
+          detailDeliveryData: "",
+          detailProcedures: "",
         }
       ]),
         (this.modal1 = true);
@@ -1411,25 +1409,22 @@ export default {
       });
       this.$refs["productionRef"].validate(valid => {
         if (valid) {
-          // let proceduresString = this.addProductionTask.procedure.join(',');
-          // this.addProductionTask['procedures']=String(proceduresString)
-          // this.addProductionTask.procedures = JSON.stringify(
-          //   this.addProductionTask.procedures
-          // );
           this.addProductionTask.procedures = this.addProductionTask.procedures.join(',')
           productionTasks(this.addProductionTask).then(res => {
             this.dataTable = res.content;
-            
-            this.$refs.Aloadding.toggleSpin = false;
-            this.modal1 = false;
             this.certificatesList.forEach(val => {
-              this.addProductionTask.qty += parseInt(val.qty);
-              val.moCode = this.addProductionTask.moCode;
-              val.moId = res.data.id;
-              AdddcMoDetail(val).then(res => {
+                this.addProductionTask.qty += parseInt(val.qty);
+                val.detailDeliveryData = res.data.deliveryData;
+                val.detailProcedures = res.data.procedures;
+                val.moCode = this.addProductionTask.moCode;
+                console.log(val.detailProcedures)
+                val.moId = res.data.id;
+                AdddcMoDetail(val).then(res => {
                 this.searchBtn();
               });
             });
+            this.modal1 = false;
+            this.$refs.Aloadding.toggleSpin = false;
           }).catch(() => {
                 this.$refs.Aloadding.toggleSpin = false;
             });
