@@ -40,7 +40,7 @@
           :rules="productionRules"
           :label-width="100"
           inline
-        >
+          >
           <!-- 上传照片 -->
           <FormItem label="照片" prop="photo">
             <div
@@ -108,18 +108,18 @@
           <FormItem label="合同交期" prop="deliveryData" style="width:240px">
             <DatePicker type="datetime" v-model="addProductionTask.deliveryData"></DatePicker>
           </FormItem>
-          <FormItem label="工序" prop="procedures" style="min-width:240px">
-            <Select v-model="addProductionTask.procedures" multiple>
-              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
-            </Select>
-          </FormItem>
-          <FormItem label="总数量" prop="qty" style="margin-left: 8px;">
+          <FormItem label="总数量" prop="qty">
             <Input v-model="addProductionTask.qty"/>
           </FormItem>
-          <FormItem label="计量单位" prop="unit" style="width:240px">
+          <FormItem label="计量单位" prop="unit" style="width:240px;margin-left:8px">
             <Select v-model="addProductionTask.unit">
               <Option value="件">件</Option>
               <Option value="包">包</Option>
+            </Select>
+          </FormItem>
+          <FormItem label="工序" prop="procedures" style="min-width:240px">
+            <Select v-model="addProductionTask.procedures" multiple>
+              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
             </Select>
           </FormItem>
           <FormItem label="备注说明" prop="memo" style="width:755px">
@@ -132,7 +132,7 @@
         </Form>
         <Divider id="titleStyle">生产任务详情</Divider>
         <!-- 生产任务数量详情 -->
-        <Form :label-width="80" inline>
+        <!-- <Form :label-width="80" inline>
           <div
             style="display:flex;justify-content:space-around;width:565px;font-size:13px;margin-bottom:7px"
           >
@@ -162,12 +162,44 @@
               <Button type="primary" style="margin-left:457px;" @click="handleRemove(index)">删除</Button>
             </div>
           </FormItem>
-        </Form>
+        </Form> -->
+        <Table :columns="certificates" :data="certificatesList">
+          <!-- 颜色 --> 
+          <template slot-scope="{ row, index }" slot="certificatesColor">
+            <Select v-model="addColor" v-if="editIndex === index">
+              <Option  v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
+            </Select>
+            <span v-else>{{row.color}}</span>
+          </template>
+          <!-- 尺码 -->
+          <template slot-scope="{ row, index }" slot="certificatesSize">
+            <Select v-model="addSize" v-if="editIndex === index">
+              <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
+            </Select>
+            <span v-else>{{row.size}}</span>
+          </template>
+          <!-- 数量 -->
+          <template slot-scope="{ row, index }" slot="certificatesQty">
+            <Input  type="text" v-if="editIndex === index" v-model="addQty" />
+            <span v-else>{{row.qty}}</span>
+          </template>
+          <!-- 操作 -->
+          <template slot-scope="{ row, index }" slot="certificatesAction">
+            <div v-if="editIndex === index">
+              <Button @click="handleSave(index)">保存</Button>
+              <Button @click="handEditIndex(row,index)">添加</Button>
+              <Button @click="handleRemove(index)">删除</Button>
+            </div>
+             <div v-else>
+              <Button @click="handleEdit(row, index)">操作</Button>
+            </div>
+          </template>
+        </Table> 
         <!-- <Spin ref="Aloadding"></Spin> -->
       </div>
 
       <div slot="footer">
-        <Button type="dashed" @click="addCertificatesEdit" icon="md-add">添加</Button>
+        <!-- <Button type="dashed" @click="addCertificatesEdit" icon="md-add">添加</Button> -->
         <Button type="default" @click="cancel">取消</Button>
         <Button type="primary" @click="Addok">提交</Button>
       </div>
@@ -249,11 +281,6 @@
           <FormItem label="合同交期" prop="deliveryData" style="width:240px">
             <DatePicker type="datetime" v-model="editorProductionTask.deliveryData"></DatePicker>
           </FormItem>
-          <FormItem label="工序" prop="procedures" style="min-width:240px">
-            <Select v-model="editorProductionTask.procedures" multiple>
-              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
-            </Select>
-          </FormItem>
           <FormItem label="总数量" prop="qty" style="margin-left: 8px;">
             <Input v-model="editorProductionTask.qty"/>
           </FormItem>
@@ -261,6 +288,11 @@
             <Select v-model="editorProductionTask.unit">
               <Option value="件">件</Option>
               <Option value="包">包</Option>
+            </Select>
+          </FormItem>
+           <FormItem label="工序" prop="procedures" style="min-width:240px">
+            <Select v-model="editorProductionTask.procedures" multiple>
+              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
             </Select>
           </FormItem>
           <br>
@@ -274,7 +306,7 @@
         </Form>
         <Divider id="titleStyle">生产任务详情</Divider>
         <!-- 生产任务数量详情 -->
-        <Form :label-width="80" inline>
+        <!-- <Form :label-width="80" inline>
           <div
             style="display:flex;justify-content:space-around;width:565px;font-size:13px;margin-bottom:7px"
           >
@@ -306,12 +338,44 @@
               @click="editHandleRemove(index,item.id)"
             >删除</Button>
           </FormItem>
-        </Form>
+        </Form> -->
+         <Table :columns="certificates" :data="editCertificatesList">
+          <!-- 颜色 --> 
+          <template slot-scope="{ row, index }" slot="certificatesColor">
+            <Select v-model="editColor" v-if="editIndexedit === index">
+              <Option  v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
+            </Select>
+            <span v-else>{{row.color}}</span>
+          </template>
+          <!-- 尺码 -->
+          <template slot-scope="{ row, index }" slot="certificatesSize">
+            <Select v-model="editSize" v-if="editIndexedit === index">
+              <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
+            </Select>
+            <span v-else>{{row.size}}</span>
+          </template>
+          <!-- 数量 -->
+          <template slot-scope="{ row, index }" slot="certificatesQty">
+            <Input  type="text" v-if="editIndexedit === index" v-model="editQty" />
+            <span v-else>{{row.qty}}</span>
+          </template>
+          <!-- 操作 -->
+          <template slot-scope="{ row, index }" slot="certificatesAction">
+            <div v-if="editIndexedit === index">
+              <Button @click="edithandleSave(index)">保存</Button>
+              <Button @click="edithandEditIndex(row,index)">添加</Button>
+              <Button @click="editHandleRemove(index,row.id)">删除</Button>
+            </div>
+             <div v-else>
+              <Button @click="edithandleEdit(row, index)">编辑</Button>
+            </div>
+          </template>
+        </Table> 
         <Spin ref="Aloadding"></Spin>
       </div>
 
       <div slot="footer">
-        <Button type="dashed" style="margin-left:119px" @click="addCertificates()" icon="md-add">添加</Button>
+        <!-- <Button type="dashed" style="margin-left:119px" @click="addCertificates()" icon="md-add">添加</Button> -->
         <Button @click="cancel">取消</Button>
         <Button type="success" @click="ok">修改</Button>
       </div>
@@ -356,7 +420,7 @@
               </div>
             </Upload>
           </FormItem>
-          <FormItem label="产品名称" prop="product" style="width:492px">
+          <FormItem label="产品名称" prop="product" style="width:492px;margin-left:-3px">
             <Input v-model="outgoingProductionTask.product" disabled/>
           </FormItem>
           <div style="margin-top: -127px;margin-left: 263px;">
@@ -372,14 +436,14 @@
             <FormItem label="生产单号" prop="moCode">
               <Input disabled v-model="outgoingProductionTask.moCode"/>
             </FormItem>
-            <FormItem label="款号" prop="styleCode">
+            <!-- <FormItem label="款号" prop="styleCode">
               <Input v-model="outgoingProductionTask.styleCode" disabled/>
             </FormItem>
             <FormItem label="客户款号" prop="customCode">
               <Input v-model="outgoingProductionTask.customCode" disabled/>
-            </FormItem>
-          </div>
-          <FormItem label="品牌" prop="brand">
+            </FormItem> -->
+          
+          <!-- <FormItem label="品牌" prop="brand">
             <Input v-model="outgoingProductionTask.brand" disabled/>
           </FormItem>
           <FormItem label="针数" prop="pins" style="margin-left: 8px;">
@@ -387,19 +451,20 @@
           </FormItem>
           <FormItem label="合同交期" prop="deliveryData" style="width:240px">
             <DatePicker type="datetime" v-model="outgoingProductionTask.deliveryData"></DatePicker>
-          </FormItem>
-          <FormItem label="工序" prop="procedures" style="min-width:240px">
-            <Select v-model="outgoingProductionTask.procedures" multiple>
-              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
-            </Select>
-          </FormItem>
-          <FormItem label="总数量" prop="qty" style="margin-left: 8px;">
-            <Input v-model="outgoingProductionTask.qty"/>
+          </FormItem> -->
+          <FormItem label="总数量" prop="qty">
+            <Input v-model="outgoingProductionTask.qty" disabled/>
           </FormItem>
           <FormItem label="计量单位" prop="unit" style="width:240px">
-            <Select v-model="outgoingProductionTask.unit">
+            <Select v-model="outgoingProductionTask.unit" disabled>
               <Option value="件">件</Option>
               <Option value="包">包</Option>
+            </Select>
+          </FormItem>
+          </div>
+          <!-- <FormItem label="工序" prop="procedures" style="min-width:240px">
+            <Select v-model="outgoingProductionTask.procedures" multiple>
+              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
             </Select>
           </FormItem>
           <FormItem label="备注说明" prop="memo" style="width:758px">
@@ -408,7 +473,7 @@
               :autosize="{minRows: 2,maxRows: 8}"
               v-model="outgoingProductionTask.memo"
             />
-          </FormItem>
+          </FormItem> -->
         </Form>
         <Divider id="titleStyle">外发任务</Divider>
         <!-- 生产任务数量详情 -->
@@ -462,13 +527,13 @@
             </template>
             <!-- 颜色 -->
             <template slot-scope="{ row, index }" slot="color">
-              <Select v-model="outgoingCertificatesList[index].color" style="width:65px">
+              <Select v-model="outgoingCertificatesList[index].color" style="width:65px" disabled>
                 <Option  v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
               </Select>
             </template>
             <!-- 尺码 -->
             <template slot-scope="{ row, index }" slot="size">
-              <Select v-model="outgoingCertificatesList[index].size" style="width:60px">
+              <Select v-model="outgoingCertificatesList[index].size" style="width:60px" disabled>
                 <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
               </Select>
             </template>
@@ -616,8 +681,15 @@ export default {
       }
     };
     return {
+      editIndexedit:-1,
+      editIndex: 0,
+      addColor:"",
+      addSize:"",
+      addQty:"",
+      editColor:"",
+      editSize:"",
+      editQty:"",
       selectData:[],
-      editIndex: -1,
       count: 0,
       data10: [],
       viewContent: {},
@@ -625,6 +697,35 @@ export default {
         moCode: ""
       },
       asdasd: [],
+      //新增
+      certificates: [
+        // {
+        //   width:"44px",
+        //   align:'center',
+        //   type: 'selection'
+        // },
+        {
+          title: "颜色",
+          align: "center",
+          slot: "certificatesColor",
+        },
+        {
+          title: "尺码",
+          align: "center",
+          slot: "certificatesSize"
+        },
+        {
+          title: "数量",
+          align: "center",
+          slot: "certificatesQty"
+        },
+        {
+          title: '操作',
+          align: "center",
+          slot: 'certificatesAction'
+        }
+      ],
+      //外加工单位表格
       outgoingColumns: [
         {
           width:"44px",
@@ -644,6 +745,12 @@ export default {
           slot: 'detailProcedures'
         },
         {
+          title: '合同交期',
+          align:'center',
+          width:'147px',
+          slot: 'deliveryData',
+        },
+        {
           title: '颜色',
           align:'center',
           slot: 'color',
@@ -661,12 +768,7 @@ export default {
           slot: 'qty',
           width:"78px"
         },
-        {
-          title: '合同交期',
-          align:'center',
-          width:'147px',
-          slot: 'deliveryData',
-        },
+       
         {
           title: '操作',
           align:'center',
@@ -1079,6 +1181,75 @@ export default {
     Spin
   },
   methods: {
+    //添加页面 表格操作按钮
+    handleEdit (row, index) {    
+      this.addColor = row.color;
+      this.addSize = row.size;
+      this.addQty = row.qty;
+      this.editIndex = index;
+      },
+    //添加页面 表格保存小按钮
+    handleSave(index){
+      this.certificatesList[index].color=this.addColor;
+      this.certificatesList[index].size=this.addSize;
+      this.certificatesList[index].qty=this.addQty;
+      this.editIndex = -1;
+    },
+    //添加页面 表格添加小按钮
+    handEditIndex(row,index){
+      this. handleSave(index)
+      this.handleEdit(row,index+1)
+      this.certificatesList.push({
+        bzQty: "",
+        color: "",
+        fzQty: "",
+        hjQty: "",
+        qty: "",
+        size: "",
+        tjQty: "",
+        ztQty: "",
+        moCode: "",
+        moId: "",
+        detailDeliveryData:"",
+        detailProcedures: "",
+      });
+    },
+
+    //编辑页面 表格操作按钮
+    edithandleEdit (row, index) {    
+      this.editColor = row.color;
+      this.editSize = row.size;
+      this.editQty = row.qty;
+      this.editIndexedit = index;
+      },
+    //编辑页面 表格保存小按钮
+    edithandleSave(index){
+      this.editCertificatesList[index].color=this.editColor;
+      this.editCertificatesList[index].size=this.editSize;
+      this.editCertificatesList[index].qty=this.editQty;
+      this.editIndexedit = -1;
+    },
+    //编辑页面 表格添加小按钮
+    edithandEditIndex(row,index){
+      // this. edithandleSave(index)
+      // this.edithandleEdit(row,index+1)
+      this.editCertificatesList.push({
+        bzQty: "",
+        color: "",
+        fzQty: "",
+        hjQty: "",
+        qty: "",
+        size: "",
+        tjQty: "",
+        ztQty: "",
+        moCode: "",
+        moId: "",
+        detailDeliveryData:"",
+        detailProcedures: "",
+      });
+    },
+    Touch(selection){
+    },
     // 发送页面选择按钮
     selectTouch(selection){
       this.selectData = selection
@@ -1103,7 +1274,9 @@ export default {
       this.$nextTick(() => {
         this.outgoing = false;
       });
-      this.outgoingProductionTask.procedures = this.outgoingProductionTask.procedures.join(",")
+      this.outgoingProductionTask.procedures = this.outgoingProductionTask.procedures.join(",");
+      this.outgoingProductionTask.pid = this.outgoingProductionTask.id;
+      this.outgoingProductionTask.id="";
       productionTasks(this.outgoingProductionTask).then(res => {
         this.selectData.forEach(val => {
           val.detailProcedures = val.detailProcedures.join(",")
@@ -1114,6 +1287,7 @@ export default {
           val.moCode = this.outgoingProductionTask.moCode;
           val.moId = res.data.id;
         });
+       
         // 尾部
           this.editInfo.jsonString = JSON.stringify(this.selectData);
           modityUpdate(this.editInfo).then(res => {
@@ -1161,6 +1335,7 @@ export default {
         TaskdetailChecklist(this.detailChecklist).then(res => {
           this.outgoingCertificatesList = [];
           res.data.content.forEach( val => {
+            if(val.detailProcedures)
             val.detailProcedures = val.detailProcedures.split(",");
           });
           console.log(res.data.content)
@@ -1308,7 +1483,7 @@ export default {
     edit(row, index) {
       this.addProductionTask.qty = 0;
       this.editInfo.ids = [];
-      this.searchalls.moCode = row.moCode;
+      this.searchalls.id = row.id;
       this.editor = true;
       this.$refs.Aloadding.toggleSpin = true;
       productiontasksFindall(this.searchalls).then(res => {
@@ -1339,10 +1514,16 @@ export default {
       this.$refs["editorProductionRef"].validate(valid => {
         if (valid) {
           this.editorProductionTask.procedures = this.editorProductionTask.procedures.join(",")
-          this.editCertificatesList.forEach(val => {
-            this.editorProductionTask.qty += parseInt(val.qty);
-          });
           productionTaskEdit(this.editorProductionTask).then(res => {
+            this.editCertificatesList.forEach(val => {
+            this.editorProductionTask.qty += parseInt(val.qty);
+            delete val.deliveryData
+            delete val.procedures
+            val.detailDeliveryData = ""
+            val.detailProcedures = ""
+            val.detailDeliveryData = res.data.deliveryData;
+            val.detailProcedures = res.data.procedures;
+          });
             //尾部修改
             this.editInfo.jsonString = JSON.stringify(
               this.editCertificatesList
@@ -1417,16 +1598,15 @@ export default {
                 val.detailDeliveryData = res.data.deliveryData;
                 val.detailProcedures = res.data.procedures;
                 val.moCode = this.addProductionTask.moCode;
-                console.log(val.detailProcedures)
                 val.moId = res.data.id;
                 AdddcMoDetail(val).then(res => {
                 this.searchBtn();
               });
             });
             this.modal1 = false;
-            this.$refs.Aloadding.toggleSpin = false;
+            // this.$refs.Aloadding.toggleSpin = false;
           }).catch(() => {
-                this.$refs.Aloadding.toggleSpin = false;
+                // this.$refs.Aloadding.toggleSpin = false;
             });
         } else {
           this.$Message.error("请正确填写信息");
@@ -1520,5 +1700,9 @@ export default {
 }
 .certificatesBox .ivu-form-item-content .ivu-input {
   width: 100%;
+}
+.ivu-input[disabled], fieldset[disabled],
+.ivu-select.ivu-select-disabled .ivu-select-selection{
+  background-color: white;
 }
 </style>

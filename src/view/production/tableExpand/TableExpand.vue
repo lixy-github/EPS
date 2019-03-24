@@ -61,18 +61,18 @@
           <FormItem label="合同交期" prop="deliveryData" style="width:240px">
             <DatePicker  type="datetime" v-model="editorProductionTask.deliveryData"></DatePicker>
           </FormItem>
-          <FormItem label="工序" prop="procedures" style="min-width:240px">
-            <Select v-model="editorProductionTask.procedures" multiple>
-              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
+          <FormItem label="计量单位" prop="unit" style="width:240px">
+            <Select v-model="editorProductionTask.unit" disabled>
+              <Option value="件">件</Option>
+              <Option value="包">包</Option>
             </Select>
           </FormItem>
           <FormItem label="总数量" prop="qty" style="margin-left: 8px;">
             <Input v-model="editorProductionTask.qty"/>
           </FormItem>
-          <FormItem label="计量单位" prop="unit" style="width:240px">
-            <Select v-model="editorProductionTask.unit" disabled>
-              <Option value="件">件</Option>
-              <Option value="包">包</Option>
+          <FormItem label="工序" prop="procedures" style="min-width:240px">
+            <Select v-model="editorProductionTask.procedures" multiple>
+              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
             </Select>
           </FormItem>
           <br>
@@ -117,7 +117,7 @@
           </FormItem>
         </Form> -->
         
-        <Table :columns="outgoingTile" :data="editCertificatesList" @on-selection-change="selectTouch">
+        <Table ref="selection" :columns="outgoingTile" :data="editCertificatesList" @on-selection-change="selectTouch">
              <template slot-scope="{ row, index }" slot="cid">
                 <Select style="width:150px" v-model="editCertificatesList[index].cid"> 
                   <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
@@ -153,9 +153,10 @@
               <DatePicker style="width:127px" type="datetime" v-model="editCertificatesList[index].detailDeliveryData"></DatePicker>
             </template>
             <!-- 操作 -->
-            <template slot-scope="{ row,index }" slot="action">
+            <template slot-scope="{row}" slot="action">
               <!-- <Button @click="addOutgoingClik(row,index)">增加</Button> -->
-              <Button @click="deleteOutgoingClik(row,index)">删除</Button>
+              <!-- <Button @click="deleteOutgoingClik(row,index)">删除</Button> -->
+              <Button type="success" @click="okList">修改</Button>
             </template>
         </Table>
         <!-- <Spin ref="Outsourcingtasks"></Spin> -->
@@ -164,7 +165,7 @@
       <div slot="footer">
         <!-- <Button type="dashed" style="margin-left:119px" @click="addCertificates()" icon="md-add">添加</Button> -->
         <Button @click="cancel">取消</Button>
-        <Button type="success" @click="okList">修改</Button>
+        <!-- <Button type="success" @click="okList">修改</Button> -->
       </div>
       
     </Modal>
@@ -209,7 +210,7 @@ export default {
         {
           width:"44px",
           align:'center',
-          type: 'selection'
+          type: 'selection',
         },
         {
           width:"170px",
@@ -345,13 +346,13 @@ export default {
           key: "username",
           align: "center",
           ellipsis: true,
-          width: "250px"
+          width: "250px",
         },
         {
           title: "工序",
           key: "detailProcedures",
           align: "center",
-          ellipsis: true
+          ellipsis: true,
         },
         {
           title: "数量",
@@ -369,21 +370,11 @@ export default {
           }
         },
         // {
-        //     title: '工序',
-        //     key: 'procedures',
-        //     align: 'center',
-        //     ellipsis: true,
-        //     render: (h,params) => {
-        //         return h('span',JSON.parse(params.row.procedures).join(','))
-        //     }
+        //   title: "工期",
+        //   key: "deliveryData",
+        //   align: "center",
+        //   ellipsis: true
         // },
-
-        {
-          title: "工期",
-          key: "deliveryData",
-          align: "center",
-          ellipsis: true
-        },
         {
           title: "完成率",
           key: "percent",
@@ -405,6 +396,7 @@ export default {
   methods: {
     // 发送页面选择按钮
     selectTouch(selection){
+      console.log(selection)
       this.editSelectData = selection
     },
     //发送页面添加按钮
@@ -423,7 +415,8 @@ export default {
     // 表格数据
     getTableData() {
       let aaa = [];
-      this.search.id = this.row.id;
+      console.log(this.row)
+      this.search.id = this.row.pid;
       outgoingEdit(this.search).then(res => {
         res.data.content.forEach(val => {
           val.deliveryData = this.row.deliveryData;
@@ -434,6 +427,7 @@ export default {
     },
     //修改确定
     okList() {
+      this.$refs.selection.selectAll(true);
       // this.editCertificatesList.forEach(val=>{
       //       val.moCode = this.editorProductionTask.moCode;
       //       val.moId = this.editorProductionTask.id;
@@ -442,9 +436,7 @@ export default {
       this.$nextTick(() => {
         this.editor = false;
       });
-      this.editorProductionTask.procedures = JSON.stringify(
-        this.editorProductionTask.procedures
-      );
+      this.editorProductionTask.procedures = this.editorProductionTask.procedures.join(",")
       productionTasks(this.editorProductionTask).then(res => {
         //修改尾部
         this.editSelectData.forEach(val => {
@@ -453,10 +445,13 @@ export default {
           val.moId = res.data.id;
           val.detailProcedures = val.detailProcedures.join(",")
           // AdddcMoDetail(val).then(res => {});
+          modifyProductionTask(val).then(res => {
+            this.getTableData()
+          })
         });
       });
-      this.editInfo.jsonString = JSON.stringify(this.editSelectData);
-      modityUpdate(this.editInfo).then(res => {});
+      // this.editInfo.jsonString = JSON.stringify(this.editSelectData);
+      // modityUpdate(this.editInfo).then(res => {});
     },
     //添加尾部
     // addCertificates() {
@@ -484,7 +479,6 @@ export default {
     },
     //删除数据
     remove(row, index) {
-      console.log(row)
       this.$Modal.confirm({
         title: "删除",
         content: "<p>确定要删除这条记录吗？</p>",
