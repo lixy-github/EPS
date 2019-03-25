@@ -163,7 +163,7 @@
             </div>
           </FormItem>
         </Form> -->
-        <Table :columns="certificates" :data="certificatesList">
+        <Table v-if="modal1" :columns="certificates" :data="certificatesList">
           <!-- 颜色 --> 
           <template slot-scope="{ row, index }" slot="certificatesColor">
             <Select v-model="addColor" v-if="editIndex === index">
@@ -510,15 +510,16 @@
             <Button type="primary" @click="outgoingHandleRemove(index,item.id)">删除</Button>
           </FormItem>
         </Form> -->
-        <Table :columns="outgoingColumns" :data="outgoingCertificatesList" @on-selection-change="selectTouch">
+        
+        <Table ref="outgoingselection" :columns="outgoingColumns" :data="outgoingCertificatesList" @on-selection-change="selectTouch">
              <template slot-scope="{ row, index }" slot="cid">
-                <Select style="width:150px" v-model="outgoingCertificatesList[index].cid"> 
+                <Select style="width:150px" v-model="outgoingCertificatesList[0].cid"> 
                   <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
                 </Select>
             </template>
             <!-- 工序 -->
             <template slot-scope="{row, index }" slot="detailProcedures">
-              <CheckboxGroup v-model="outgoingCertificatesList[index].detailProcedures">
+              <CheckboxGroup v-model="outgoingCertificatesList[0].detailProcedures">
                   <Checkbox label="横机"></Checkbox>
                   <Checkbox label="套口"></Checkbox>
                   <Checkbox label="洗整"></Checkbox>
@@ -543,7 +544,7 @@
             </template>
             <!-- 合同交期 -->
             <template slot-scope="{ row, index }" slot="deliveryData">
-              <DatePicker style="width:127px" type="datetime" v-model="outgoingCertificatesList[index].detailDeliveryData"></DatePicker>
+              <DatePicker style="width:127px" type="datetime" v-model="outgoingCertificatesList[0].detailDeliveryData"></DatePicker>
             </template>
             <!-- 操作 -->
             <template slot-scope="{ row,index }" slot="action">
@@ -681,6 +682,7 @@ export default {
       }
     };
     return {
+      addIndex:'',
       editIndexedit:-1,
       editIndex: 0,
       addColor:"",
@@ -1181,23 +1183,24 @@ export default {
     Spin
   },
   methods: {
-    //添加页面 表格操作按钮
+    //添加页面 表格 操作 按钮
     handleEdit (row, index) {    
       this.addColor = row.color;
       this.addSize = row.size;
       this.addQty = row.qty;
       this.editIndex = index;
       },
-    //添加页面 表格保存小按钮
+    //添加页面 表格 保存 小按钮
     handleSave(index){
       this.certificatesList[index].color=this.addColor;
       this.certificatesList[index].size=this.addSize;
       this.certificatesList[index].qty=this.addQty;
       this.editIndex = -1;
     },
-    //添加页面 表格添加小按钮
+    //添加页面 表格 添加 小按钮
     handEditIndex(row,index){
-      this. handleSave(index)
+      this.addIndex = index
+      this.handleSave(index)
       this.handleEdit(row,index+1)
       this.certificatesList.push({
         bzQty: "",
@@ -1215,21 +1218,21 @@ export default {
       });
     },
 
-    //编辑页面 表格操作按钮
+    //编辑页面 表格 编辑 按钮
     edithandleEdit (row, index) {    
       this.editColor = row.color;
       this.editSize = row.size;
       this.editQty = row.qty;
       this.editIndexedit = index;
       },
-    //编辑页面 表格保存小按钮
+    //编辑页面 表格 保存 小按钮
     edithandleSave(index){
       this.editCertificatesList[index].color=this.editColor;
       this.editCertificatesList[index].size=this.editSize;
       this.editCertificatesList[index].qty=this.editQty;
       this.editIndexedit = -1;
     },
-    //编辑页面 表格添加小按钮
+    //编辑页面 表格 添加 小按钮
     edithandEditIndex(row,index){
       // this. edithandleSave(index)
       // this.edithandleEdit(row,index+1)
@@ -1265,8 +1268,18 @@ export default {
       }
     },
     //发送
+    // handleSelectAll () {
+    //       this.$refs.outgoingselection.selectAll(true);
+    //   },
     okOutgoing() {
+      if(this.selectData.length<1){
+        this.$refs.outgoingselection.selectAll(true);
+      }
+      console.log(this.selectData)
       this.selectData.forEach(val => {
+        // val.cid = this.selectData[0].cid;
+        // val.detailProcedures = this.selectData[0].detailProcedures;
+        // val.detailDeliveryData = this.selectData[0].detailDeliveryData;
         val.moCode = this.outgoingProductionTask.moCode;
         val.moId = this.outgoingProductionTask.id;
       });
@@ -1279,21 +1292,26 @@ export default {
       this.outgoingProductionTask.id="";
       productionTasks(this.outgoingProductionTask).then(res => {
         this.selectData.forEach(val => {
-          val.detailProcedures = val.detailProcedures.join(",")
-          delete val.id
-          delete val.procedures
-          delete val.deliveryData
+         if(typeof val.detailProcedures != "string"){
+           val.detailProcedures = val.detailProcedures.join(",");
+         }
+          val.cid = this.selectData[0].cid;
+          val.detailProcedures = this.selectData[0].detailProcedures;
+          val.detailDeliveryData = this.selectData[0].detailDeliveryData;
+          delete val.id;
+          delete val.procedures;
+          delete val.deliveryData;
           this.outgoingProductionTask.qty += parseInt(val.qty);
           val.moCode = this.outgoingProductionTask.moCode;
           val.moId = res.data.id;
+          AdddcMoDetail(val).then( res => {})
         });
-       
         // 尾部
-          this.editInfo.jsonString = JSON.stringify(this.selectData);
-          modityUpdate(this.editInfo).then(res => {
-            this.editInfo.ids=[];
-            this.searchBtn();
-          });
+          // this.editInfo.jsonString = JSON.stringify(this.selectData);
+          // modityUpdate(this.editInfo).then(res => {
+          //   this.editInfo.ids=[];
+          //   this.searchBtn();
+          // });
       });
     },
     // 查看
@@ -1322,6 +1340,7 @@ export default {
     },
     // 外发按钮
     outgoinghanldclick(row) {
+      this.selectData = [];
       this.$refs.outgoingAloadding.toggleSpin = true;
       this.outgoing = true;
       this.searchalls.id = row.id;
@@ -1338,7 +1357,6 @@ export default {
             if(val.detailProcedures)
             val.detailProcedures = val.detailProcedures.split(",");
           });
-          console.log(res.data.content)
           this.outgoingCertificatesList = res.data.content;
           this.$refs.outgoingAloadding.toggleSpin = false;
         });
@@ -1404,6 +1422,7 @@ export default {
       // this.addProductionTask.qty=0
       if (this.certificatesList.length > 1) {
         this.certificatesList.splice(index, 1);
+        this.editIndex = index-1
         // let deleCount = 0;
         // if(this.certificatesList.length){
         //     this.certificatesList.forEach(val=>{
@@ -1419,6 +1438,7 @@ export default {
       }
       if (this.editCertificatesList.length > 1) {
         this.editCertificatesList.splice(index, 1);
+        this.editIndexedit = -1
       }
     },
     outgoingHandleRemove(index, id) {
@@ -1481,6 +1501,7 @@ export default {
     },
     //编辑
     edit(row, index) {
+      this.editIndexedit = -1
       this.addProductionTask.qty = 0;
       this.editInfo.ids = [];
       this.searchalls.id = row.id;
@@ -1560,7 +1581,11 @@ export default {
     },
     //新增显示按钮
     showAddRoad() {
-      (this.certificatesList = [
+      this.editIndex=0; 
+      this.addColor = "";
+      this.addSize = "";
+      this.addQty = "";
+      this.certificatesList = [
         {
           qty: "",
           color: "",
@@ -1574,8 +1599,8 @@ export default {
           detailDeliveryData: "",
           detailProcedures: "",
         }
-      ]),
-        (this.modal1 = true);
+      ];
+      this.modal1 = true;
       this.value3 = true;
       let count = this.certificatesList.length;
       this.certificatesList.splice(1, count);
@@ -1590,6 +1615,7 @@ export default {
       });
       this.$refs["productionRef"].validate(valid => {
         if (valid) {
+          this.handleSave(this.addIndex+1)
           this.addProductionTask.procedures = this.addProductionTask.procedures.join(',')
           productionTasks(this.addProductionTask).then(res => {
             this.dataTable = res.content;
