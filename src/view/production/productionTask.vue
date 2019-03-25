@@ -662,7 +662,8 @@ import {
   modifyProductionTask,
   modity,
   outgoingEdit,
-  modityUpdate
+  modityUpdate,
+  searlist
 } from "../../api/production/productionTask.js";
 import { parse } from "semver";
 export default {
@@ -1051,7 +1052,7 @@ export default {
               props: {
                 row: params.row,
                 toView: this.toView
-              }
+              },
             });
           }
         },
@@ -1268,14 +1269,10 @@ export default {
       }
     },
     //发送
-    // handleSelectAll () {
-    //       this.$refs.outgoingselection.selectAll(true);
-    //   },
     okOutgoing() {
       if(this.selectData.length<1){
         this.$refs.outgoingselection.selectAll(true);
       }
-      console.log(this.selectData)
       this.selectData.forEach(val => {
         // val.cid = this.selectData[0].cid;
         // val.detailProcedures = this.selectData[0].detailProcedures;
@@ -1290,6 +1287,7 @@ export default {
       this.outgoingProductionTask.procedures = this.outgoingProductionTask.procedures.join(",");
       this.outgoingProductionTask.pid = this.outgoingProductionTask.id;
       this.outgoingProductionTask.id="";
+      this.outgoingProductionTask.cid = this.selectData[0].cid
       productionTasks(this.outgoingProductionTask).then(res => {
         this.selectData.forEach(val => {
          if(typeof val.detailProcedures != "string"){
@@ -1304,7 +1302,9 @@ export default {
           this.outgoingProductionTask.qty += parseInt(val.qty);
           val.moCode = this.outgoingProductionTask.moCode;
           val.moId = res.data.id;
-          AdddcMoDetail(val).then( res => {})
+          AdddcMoDetail(val).then( res => {
+            this.searchBtn();
+          })
         });
         // 尾部
           // this.editInfo.jsonString = JSON.stringify(this.selectData);
@@ -1317,26 +1317,31 @@ export default {
     // 查看
     toView(row) {
       this.$refs.lookAloadding.toggleSpin = true;
-      this.data10 = [];
+      // this.data10 = [];
       this.view = true;
-      this.searchalls.moCode = row.moCode;
-      productiontasksFindall(this.searchalls).then(res => {
-        res.data.content[0].procedures = res.data.content[0].procedures;
-        this.constomer.forEach(val => {
-          if (val.id == res.data.content[0].custom) {
-            res.data.content[0].custom = val.username;
-          }
-        });
-        //获取表格数据
-        this.viewContent = res.data.content[0];
-        this.search.id = row.id;
-        outgoingEdit(this.search).then(res => {
-          res.data.content.forEach(val => {
-            this.data10.push(val);
-          });
-          this.$refs.lookAloadding.toggleSpin = false;
-        });
-      });
+      this.searchalls.id = row.id;
+      // productiontasksFindall(this.searchalls).then(res => {
+      //   res.data.content[0].procedures = res.data.content[0].procedures;
+      //   this.constomer.forEach(val => {
+      //     if (val.id == res.data.content[0].custom) {
+      //       res.data.content[0].custom = val.username;
+      //     }
+      //   });
+      //   //获取表格数据
+      //   this.viewContent = res.data.content[0];
+      //   this.search.id = row.id;
+      //   outgoingEdit(this.search).then(res => {
+      //     res.data.content.forEach(val => {
+      //       this.data10.push(val);
+      //     });
+      //     this.$refs.lookAloadding.toggleSpin = false;
+      //   });
+      // });
+      searlist(this.searchalls).then( res => {
+        this.data10 = res.data[0].dcMoDetail
+        this.viewContent = res.data[1].productionTasks
+        this.$refs.lookAloadding.toggleSpin = false;
+      })
     },
     // 外发按钮
     outgoinghanldclick(row) {
@@ -1504,12 +1509,12 @@ export default {
       this.editIndexedit = -1
       this.addProductionTask.qty = 0;
       this.editInfo.ids = [];
-      this.searchalls.id = row.id;
+      // this.searchalls.id = row.id;
       this.editor = true;
       this.$refs.Aloadding.toggleSpin = true;
-      productiontasksFindall(this.searchalls).then(res => {
-        res.data.content[0].procedures = res.data.content[0].procedures.split(",")
-        this.editorProductionTask = res.data.content[0];
+      productionTaskFindbyid(row.id).then(res => {
+        res.data.procedures = res.data.procedures.split(",")
+        this.editorProductionTask = res.data;
         //获取尾部数据
         this.detailChecklist.id = row.id;
         TaskdetailChecklist(this.detailChecklist).then(res => {
@@ -1615,7 +1620,7 @@ export default {
       });
       this.$refs["productionRef"].validate(valid => {
         if (valid) {
-          this.handleSave(this.addIndex+1)
+          // this.handleSave(this.addIndex+1)
           this.addProductionTask.procedures = this.addProductionTask.procedures.join(',')
           productionTasks(this.addProductionTask).then(res => {
             this.dataTable = res.content;

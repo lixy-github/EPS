@@ -84,7 +84,7 @@
               v-model="editorProductionTask.memo"
             />
           </FormItem>
-        </Form>
+        </Form>      
         <Divider id="titleStyle">生产任务详情</Divider>
         <!-- 生产任务 -->
         <!-- <Form :label-width="80" inline>
@@ -119,13 +119,13 @@
         
         <Table ref="selection" :columns="outgoingTile" :data="editCertificatesList" @on-selection-change="selectTouch">
              <template slot-scope="{ row, index }" slot="cid">
-                <Select style="width:150px" v-model="editCertificatesList[index].cid"> 
+                <Select style="width:150px" v-model="editCertificatesList[0].cid"> 
                   <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
                 </Select>
             </template>
             <!-- 工序 -->
             <template slot-scope="{row, index }" slot="procedures">
-              <CheckboxGroup v-model="editCertificatesList[index].detailProcedures">
+              <CheckboxGroup v-model="editCertificatesList[0].detailProcedures" style="width:150px">
                   <Checkbox label="横机"></Checkbox>
                   <Checkbox label="套口"></Checkbox>
                   <Checkbox label="洗整"></Checkbox>
@@ -150,22 +150,22 @@
             </template>
             <!-- 合同交期 -->
             <template slot-scope="{ row, index }" slot="deliveryData">
-              <DatePicker style="width:127px" type="datetime" v-model="editCertificatesList[index].detailDeliveryData"></DatePicker>
+              <DatePicker type="datetime" v-model="editCertificatesList[0].detailDeliveryData"></DatePicker>
             </template>
             <!-- 操作 -->
-            <template slot-scope="{row}" slot="action">
+            <!-- <template slot-scope="{row}" slot="action"> -->
               <!-- <Button @click="addOutgoingClik(row,index)">增加</Button> -->
               <!-- <Button @click="deleteOutgoingClik(row,index)">删除</Button> -->
-              <Button type="success" @click="okList">修改</Button>
-            </template>
+              <!-- <Button type="success" @click="okList">修改</Button> -->
+            <!-- </template> -->
         </Table>
-        <!-- <Spin ref="Outsourcingtasks"></Spin> -->
+         <!-- <Spin ref="Outsourcingtasks"></Spin> -->
       </div>
 
       <div slot="footer">
         <!-- <Button type="dashed" style="margin-left:119px" @click="addCertificates()" icon="md-add">添加</Button> -->
+        <Button type="success" @click="okList">修改</Button>
         <Button @click="cancel">取消</Button>
-        <!-- <Button type="success" @click="okList">修改</Button> -->
       </div>
       
     </Modal>
@@ -196,7 +196,8 @@ import {
   modityUpdate,
   productionTasks,
   modifyProductionTask,
-  searlist
+  searlist,
+  productionTaskEdit
 } from "../../../api/production/productionTask.js";
 export default {
   props: {
@@ -221,39 +222,36 @@ export default {
         {
           title: '工序',
           align:'center',
-          width:'148px',
+          width:"170px",
           slot: 'procedures'
+        },
+        {
+          title: '合同交期',
+          align:'center',
+          width:"190px",
+          slot: 'deliveryData',
         },
         {
           title: '颜色',
           align:'center',
           slot: 'color',
-          width:"83px"
         },
         {
           title: '尺码',
           align:'center',
           slot: 'size',
-          width:"78px"
         },
         {
           title: '数量',
           align:'center',
           slot: 'qty',
-          width:"78px"
         },
-        {
-          title: '合同交期',
-          align:'center',
-          width:'147px',
-          slot: 'deliveryData',
-        },
-        {
-          title: '操作',
-          align:'center',
-          slot: 'action',
-          width: "160px"
-        },
+        // {
+        //   title: '操作',
+        //   align:'center',
+        //   slot: 'action',
+        //   width: "160px"
+        // },
       ],
       editorProductionTask: {},
       editInfo:{
@@ -365,9 +363,9 @@ export default {
           key: "detailDeliveryData",
           align: "center",
           ellipsis: true,
-          render:(h,params) => {
-            return h('span',params.row.detailDeliveryData.slice(0,-5).replace(/T/g," "))
-          }
+          // render:(h,params) => {
+          //   return h('span',params.row.detailDeliveryData.slice(0,-5).replace(/T/g," "))
+          // }
         },
         // {
         //   title: "工期",
@@ -396,7 +394,6 @@ export default {
   methods: {
     // 发送页面选择按钮
     selectTouch(selection){
-      console.log(selection)
       this.editSelectData = selection
     },
     //发送页面添加按钮
@@ -415,8 +412,7 @@ export default {
     // 表格数据
     getTableData() {
       let aaa = [];
-      console.log(this.row)
-      this.search.id = this.row.pid;
+      this.search.id = this.row.id;
       outgoingEdit(this.search).then(res => {
         res.data.content.forEach(val => {
           val.deliveryData = this.row.deliveryData;
@@ -427,29 +423,31 @@ export default {
     },
     //修改确定
     okList() {
-      this.$refs.selection.selectAll(true);
-      // this.editCertificatesList.forEach(val=>{
-      //       val.moCode = this.editorProductionTask.moCode;
-      //       val.moId = this.editorProductionTask.id;
-      //   })
       this.editor = true;
       this.$nextTick(() => {
         this.editor = false;
       });
       this.editorProductionTask.procedures = this.editorProductionTask.procedures.join(",")
-      productionTasks(this.editorProductionTask).then(res => {
+      productionTaskEdit(this.editorProductionTask).then( res => {
         //修改尾部
-        this.editSelectData.forEach(val => {
-          // this.editorProductionTask.qty += parseInt(val.qty);
-          val.moCode = this.editorProductionTask.moCode;
-          val.moId = res.data.id;
-          val.detailProcedures = val.detailProcedures.join(",")
-          // AdddcMoDetail(val).then(res => {});
-          modifyProductionTask(val).then(res => {
-            this.getTableData()
-          })
-        });
-      });
+          this.editSelectData.forEach(val => {
+            // this.editorProductionTask.qty += parseInt(val.qty);
+            val.moCode = this.editorProductionTask.moCode;
+            val.moId = res.data.id;
+            if(typeof val.detailProcedures != "string"){
+              val.detailProcedures = val.detailProcedures.join(",")
+            }
+            // AdddcMoDetail(val).then(res => {});
+            modifyProductionTask(val).then(res => {
+              this.getTableData()
+            })
+          });
+      })
+      // this.$refs.selection.selectAll(true);
+      // this.editCertificatesList.forEach(val=>{
+      //       val.moCode = this.editorProductionTask.moCode;
+      //       val.moId = this.editorProductionTask.id;
+      //   })
       // this.editInfo.jsonString = JSON.stringify(this.editSelectData);
       // modityUpdate(this.editInfo).then(res => {});
     },
@@ -483,7 +481,7 @@ export default {
         title: "删除",
         content: "<p>确定要删除这条记录吗？</p>",
         onOk: () => {
-          deleteProduction(row.id).then(res => {
+          productionTaskDelete(row.id).then(res => {
             this.getTableData();
           });
         }
@@ -500,9 +498,11 @@ export default {
         res.data[1].productionTasks.procedures = res.data[1].productionTasks.procedures.split(",")
         this.editorProductionTask = res.data[1].productionTasks
         // 尾部 
-        res.data[0].dcMoDetail.detailProcedures  = res.data[0].dcMoDetail.detailProcedures.split(",")
-        footerDate.push(res.data[0].dcMoDetail)
-        this.editCertificatesList = footerDate
+        res.data[0].dcMoDetail.forEach( (val) => {
+          val.detailProcedures = val.detailProcedures.split(",")
+        })
+        this.editCertificatesList =  res.data[0].dcMoDetail
+        // this.$refs.Outsourcingtasks.toggleSpin = false
       })
       // productiontasksFindall(this.searchalls).then(res => {
       //   res.data.content[0].procedures = res.data.content[0].procedures.split(",")
@@ -515,7 +515,7 @@ export default {
       //       val.procedures = val.procedures.split(",")
       //     });
       //     this.editCertificatesList = res.data.content;
-      //     // this.$refs.Outsourcingtasks.toggleSpin = false
+         
       //   });
       // });
     },
