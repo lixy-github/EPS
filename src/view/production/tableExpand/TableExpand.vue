@@ -119,18 +119,18 @@
         </Form> -->
         
         <Table ref="selection" :columns="outgoingTile" :data="editCertificatesList" @on-selection-change="selectTouch">
-             <template slot-scope="{ row, index }" slot="cid">
-                <Select style="width:150px" v-model="editCertificatesList[0].cid"> 
-                  <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
-                </Select>
+            <template slot-scope="{ row, index }" slot="cid">
+              <Select style="width:150px;" v-model="editCertificatesList[0].cid" :disabled="index==1"> 
+                <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
+              </Select>
             </template>
             <!-- 工序 -->
             <template slot-scope="{row, index }" slot="procedures">
               <CheckboxGroup v-model="editCertificatesList[0].detailProcedures" style="width:150px">
-                  <Checkbox label="横机"></Checkbox>
-                  <Checkbox label="套口"></Checkbox>
-                  <Checkbox label="洗整"></Checkbox>
-                  <Checkbox label="包装"></Checkbox>
+                  <Checkbox label="横机" :disabled="index==1"></Checkbox>
+                  <Checkbox label="套口" :disabled="index==1"></Checkbox>
+                  <Checkbox label="洗整" :disabled="index==1"></Checkbox>
+                  <Checkbox label="包装" :disabled="index==1"></Checkbox>
               </CheckboxGroup>
             </template>
             <!-- 颜色 -->
@@ -151,7 +151,7 @@
             </template>
             <!-- 合同交期 -->
             <template slot-scope="{ row, index }" slot="deliveryData">
-              <DatePicker type="datetime" v-model="editCertificatesList[0].detailDeliveryData"></DatePicker>
+              <DatePicker type="datetime" v-model="editCertificatesList[0].detailDeliveryData" :disabled="index==1"></DatePicker>
             </template>
             <!-- 操作 -->
             <!-- <template slot-scope="{row}" slot="action"> -->
@@ -559,6 +559,7 @@ export default {
         this.editCertificatesList.splice(index, 1);
       }
     },
+    //显示
     openToview(row){
       // this.toView(this.row)
       this.ed = false;
@@ -597,11 +598,14 @@ export default {
       this.$nextTick(() => {
         this.editor = false;
       });
+      if(this.editSelectData[0].cid){
+        this.editorProductionTask.cid = this.editSelectData[0].cid
+      }
       this.editorProductionTask.procedures = this.editorProductionTask.procedures.join(",")
+      // this.editorProductionTask.cid=this.editSelectData.cid 
       productionTaskEdit(this.editorProductionTask).then( res => {
         //修改尾部
           this.editSelectData.forEach(val => {
-            console.log(val)
             // this.editorProductionTask.qty += parseInt(val.qty);
             // val.moCode = this.editorProductionTask.moCode;
             // val.moId = res.data.id;
@@ -671,6 +675,7 @@ export default {
         // 尾部 
         res.data[0].dcMoDetail.forEach( (val) => {
           val.detailProcedures = val.detailProcedures.split(",")
+          val.cid = res.data[1].productionTasks.cid;
         })
         this.editCertificatesList =  res.data[0].dcMoDetail
         // this.$refs.Outsourcingtasks.toggleSpin = false
