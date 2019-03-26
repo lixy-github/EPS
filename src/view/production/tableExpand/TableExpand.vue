@@ -1,4 +1,5 @@
 <template>
+<div>
   <div>
     <!-- 编辑内容 -->
     <Modal v-model="editor" :loading="ed" fullscreen title="编辑发送任务">
@@ -174,13 +175,65 @@
         <template slot-scope="{row, index}" slot="action">
           <div>
             <Icon type="ios-create-outline" size="20" @click="edit(row,index)"/>
-            <Icon type="ios-eye-outline" size="20" @click="openToview"/>
+            <Icon type="ios-eye-outline" size="20" @click="openToview(row)"/>
             <Icon type="ios-trash-outline" size="20" @click="remove(row,index)"/>
           </div>
         </template>
       </Table>
     </div>
   </div>
+  <div>
+    <!-- 查看 半屏-->
+    <Drawer
+      v-model="view"
+      width="60%"
+      :loading="ed"
+      fullscreen
+      title="查看外发任务"
+      @on-cancel="cancel">
+      <div>
+        <img style="width:200px;height:200px" :src="uploadAction+this.viewContent.photo">
+      </div>
+      <div style="float: left;margin-top: -194px;margin-left: 222px;">
+        <span style="font-size:16px;margin-right:17px">生产单号:
+          <span style="font-size:14px">{{viewContent.moCode}}</span>
+        </span>
+        <span style="font-size:16px;margin-right:17px">客户名称:
+          <span style="font-size:14px">{{viewContent.custom}}</span>
+        </span>
+        <span style="font-size:16px;margin-right:17px">客户款号:
+          <span style="font-size:14px">{{viewContent.customCode}}</span>
+        </span>
+        <span style="font-size:16px;margin-right:17px">款号:
+          <span style="font-size:14px">{{viewContent.styleCode}}</span>
+        </span>
+      </div>
+      <div style="float: left;margin-top:-121px ;margin-left: 222px;">
+        <span style="font-size:16px;margin-right:17px">合同交期:
+          <span style="font-size:14px">{{viewContent.deliveryData}}</span>
+        </span>
+        <span style="font-size:16px;margin-right:17px">品牌:
+          <span style="font-size:14px">{{viewContent.brand}}</span>
+        </span>
+        <span style="font-size:16px;margin-right:17px">计量单位:
+          <span style="font-size:14px">{{viewContent.unit}}</span>
+        </span>
+        <span style="font-size:16px;margin-right:17px">总数量:
+          <span style="font-size:14px">{{viewContent.qty}}</span>
+        </span>
+      </div>
+      <div style="float: left;margin-top:-51px ;margin-left: 222px;">
+        <span style="font-size:16px;margin-right:17px">备注说明:
+          <span style="font-size:14px">{{viewContent.memo}}</span>
+        </span>
+      </div>
+      <div style="margin-top:20px">
+        <Table :columns="lookProduction" :data="data10" border></Table>
+      </div>
+      <!-- <Spin ref="lookAloadding"></Spin> -->
+    </Drawer>
+  </div>
+</div>  
 </template>
 <script>
 import axios from "../../../libs/AxiosPlugin";
@@ -206,6 +259,10 @@ export default {
   },
   data() {
     return {
+      ed:true,
+      viewContent: {},
+      view:false,
+      data10:[],
       editSelectData:[],
       outgoingTile: [
         {
@@ -252,6 +309,102 @@ export default {
         //   slot: 'action',
         //   width: "160px"
         // },
+      ],
+      lookProduction: [
+        {
+          title: "颜色",
+          align: "center",
+          width: "80px",
+          key: "color"
+        },
+        {
+          title: "尺码",
+          width: "70px",
+          align: "center",
+          key: "size"
+        },
+        {
+          title: "计划数",
+          align: "center",
+          width: "100px",
+          key: "qty"
+        },
+        {
+          title: "横机",
+          align: "center",
+          children: [
+            {
+              title: "完成数",
+              key: "",
+              aligin: "center",
+              width: "75px"
+            },
+            {
+              title: "比例",
+              key: "",
+              aligin: "center",
+              width: "70px"
+            }
+          ]
+        },
+        {
+          title: "套口",
+          align: "center",
+          children: [
+            {
+              title: "完成数",
+              key: "",
+              aligin: "center",
+              width: "75px"
+            },
+            {
+              title: "比例",
+              key: "",
+              aligin: "center",
+              width: "70px"
+            }
+          ]
+        },
+        {
+          title: "洗整",
+          align: "center",
+          children: [
+            {
+              title: "完成数",
+              key: "",
+              aligin: "center",
+              width: "75px"
+            },
+            {
+              title: "比例",
+              key: "",
+              aligin: "center",
+              width: "70px"
+            }
+          ]
+        },
+        {
+          title: "包装",
+          align: "center",
+          children: [
+            {
+              title: "完成数",
+              key: "",
+              aligin: "center",
+              width: "75px"
+            },
+            {
+              title: "比例",
+              width: "70px",
+              key: "",
+              aligin: "center"
+            }
+          ]
+        },
+        {
+          title: "合计",
+          align: "center"
+        }
       ],
       editorProductionTask: {},
       editInfo:{
@@ -406,8 +559,25 @@ export default {
         this.editCertificatesList.splice(index, 1);
       }
     },
-    openToview(){
-      this.toView(this.row)
+    openToview(row){
+      // this.toView(this.row)
+      this.ed = false;
+      this.$nextTick(() => {
+        this.ed = true;
+      });
+      this.view = true
+      this.searchalls.id = row.id;
+      searlist(this.searchalls).then(res => {
+        // 头部
+        res.data[1].productionTasks.procedures = res.data[1].productionTasks.procedures.split(",")
+        this.viewContent = res.data[1].productionTasks
+        // 尾部 
+        res.data[0].dcMoDetail.forEach( (val) => {
+          val.detailProcedures = val.detailProcedures.split(",")
+        })
+        this.data10 =  res.data[0].dcMoDetail
+        // this.$refs.Outsourcingtasks.toggleSpin = false
+      })
     },
     // 表格数据
     getTableData() {
@@ -431,9 +601,10 @@ export default {
       productionTaskEdit(this.editorProductionTask).then( res => {
         //修改尾部
           this.editSelectData.forEach(val => {
+            console.log(val)
             // this.editorProductionTask.qty += parseInt(val.qty);
-            val.moCode = this.editorProductionTask.moCode;
-            val.moId = res.data.id;
+            // val.moCode = this.editorProductionTask.moCode;
+            // val.moId = res.data.id;
             if(typeof val.detailProcedures != "string"){
               val.detailProcedures = val.detailProcedures.join(",")
             }
