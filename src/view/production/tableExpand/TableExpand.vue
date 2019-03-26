@@ -120,17 +120,17 @@
         
         <Table ref="selection" :columns="outgoingTile" :data="editCertificatesList" @on-selection-change="selectTouch">
             <template slot-scope="{ row, index }" slot="cid">
-              <Select style="width:150px;" v-model="editCertificatesList[0].cid" :disabled="index==1"> 
+              <Select style="width:150px;" v-model="editCertificatesList[0].cid" :disabled="index>0"> 
                 <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
               </Select>
             </template>
             <!-- 工序 -->
             <template slot-scope="{row, index }" slot="procedures">
               <CheckboxGroup v-model="editCertificatesList[0].detailProcedures" style="width:150px">
-                  <Checkbox label="横机" :disabled="index==1"></Checkbox>
-                  <Checkbox label="套口" :disabled="index==1"></Checkbox>
-                  <Checkbox label="洗整" :disabled="index==1"></Checkbox>
-                  <Checkbox label="包装" :disabled="index==1"></Checkbox>
+                  <Checkbox label="横机" :disabled="index>0"></Checkbox>
+                  <Checkbox label="套口" :disabled="index>0"></Checkbox>
+                  <Checkbox label="洗整" :disabled="index>0"></Checkbox>
+                  <Checkbox label="包装" :disabled="index>0"></Checkbox>
               </CheckboxGroup>
             </template>
             <!-- 颜色 -->
@@ -151,7 +151,7 @@
             </template>
             <!-- 合同交期 -->
             <template slot-scope="{ row, index }" slot="deliveryData">
-              <DatePicker type="datetime" v-model="editCertificatesList[0].detailDeliveryData" :disabled="index==1"></DatePicker>
+              <DatePicker type="datetime" v-model="editCertificatesList[0].detailDeliveryData" :disabled="index>0"></DatePicker>
             </template>
             <!-- 操作 -->
             <!-- <template slot-scope="{row}" slot="action"> -->

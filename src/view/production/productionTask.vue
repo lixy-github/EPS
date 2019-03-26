@@ -166,32 +166,26 @@
         <Table v-if="modal1" :columns="certificates" :data="certificatesList">
           <!-- 颜色 --> 
           <template slot-scope="{ row, index }" slot="certificatesColor">
-            <Select v-model="addColor" v-if="editIndex === index">
+            <!-- <Select v-model="addColor" v-if="editIndex === index">
               <Option  v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
-            </Select>
-            <span v-else>{{row.color}}</span>
+            </Select> -->
+            <Input  type="text" v-model="certificatesListCb[index].color" />
           </template>
           <!-- 尺码 -->
           <template slot-scope="{ row, index }" slot="certificatesSize">
-            <Select v-model="addSize" v-if="editIndex === index">
+            <Select v-model="certificatesListCb[index].size">
               <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
             </Select>
-            <span v-else>{{row.size}}</span>
           </template>
           <!-- 数量 -->
           <template slot-scope="{ row, index }" slot="certificatesQty">
-            <Input  type="text" v-if="editIndex === index" v-model="addQty" />
-            <span v-else>{{row.qty}}</span>
+            <Input  type="text" v-model="certificatesListCb[index].qty"/>
           </template>
           <!-- 操作 -->
           <template slot-scope="{ row, index }" slot="certificatesAction">
-            <div v-if="editIndex === index">
-              <Button @click="handleSave(index)">保存</Button>
+            <div>
               <Button @click="handEditIndex(row,index)">添加</Button>
               <Button @click="handleRemove(index)">删除</Button>
-            </div>
-             <div v-else>
-              <Button @click="handleEdit(row, index)">操作</Button>
             </div>
           </template>
         </Table> 
@@ -342,32 +336,27 @@
          <Table :columns="certificates" :data="editCertificatesList">
           <!-- 颜色 --> 
           <template slot-scope="{ row, index }" slot="certificatesColor">
-            <Select v-model="editColor" v-if="editIndexedit === index">
+            <!-- <Select v-model="editColor" v-if="editIndexedit === index">
               <Option  v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
-            </Select>
-            <span v-else>{{row.color}}</span>
+            </Select> -->
+            <Input type="text" v-model="editCertificatesListCb[index].color" />
           </template>
           <!-- 尺码 -->
           <template slot-scope="{ row, index }" slot="certificatesSize">
-            <Select v-model="editSize" v-if="editIndexedit === index">
+            <Select v-model="editCertificatesListCb[index].size">
               <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
             </Select>
-            <span v-else>{{row.size}}</span>
           </template>
           <!-- 数量 -->
           <template slot-scope="{ row, index }" slot="certificatesQty">
-            <Input  type="text" v-if="editIndexedit === index" v-model="editQty" />
-            <span v-else>{{row.qty}}</span>
+            <Input  type="text" v-model="editCertificatesListCb[index].qty" />
           </template>
           <!-- 操作 -->
           <template slot-scope="{ row, index }" slot="certificatesAction">
-            <div v-if="editIndexedit === index">
-              <Button @click="edithandleSave(index)">保存</Button>
+            <div>
+              <!-- <Button @click="edithandleSave(index)">保存</Button> -->
               <Button @click="edithandEditIndex(row,index)">添加</Button>
               <Button @click="editHandleRemove(index,row.id)">删除</Button>
-            </div>
-             <div v-else>
-              <Button @click="edithandleEdit(row, index)">编辑</Button>
             </div>
           </template>
         </Table> 
@@ -510,47 +499,63 @@
             <Button type="primary" @click="outgoingHandleRemove(index,item.id)">删除</Button>
           </FormItem>
         </Form> -->
-        
-        <Table ref="outgoingselection" :columns="outgoingColumns" :data="outgoingCertificatesList" @on-selection-change="selectTouch">
-             <template slot-scope="{ row, index }" slot="cid">
-                <Select style="width:150px" v-model="outgoingCertificatesList[0].cid" :disabled="index==1"> 
+        <div style="display:flex;margin:auto;justify-content:center">
+        <Form  :label-width="90" ref="productionRef" :model="addOutgoing" inline>
+          <FormItem label="外加工单位" prop="custom" style="width:200px">
+            <Select filterable v-model="addOutgoing.cid">
+              <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
+            </Select>
+          </FormItem>
+          <FormItem label="合同交期" prop="detailDeliveryData" style="width:243px">
+            <DatePicker type="datetime" v-model="addOutgoing.detailDeliveryData"></DatePicker>
+          </FormItem>
+          <FormItem label="工序" prop="detailProcedures" style="min-width:237px">
+            <Select v-model="addOutgoing.detailProcedures" multiple>
+              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
+            </Select>
+          </FormItem>
+        </Form>
+        </div>
+        <Table ref="outgoingselection" :columns="outgoingColumns" :data="outgoingCertificatesList" @on-selection-change="selectTouch" style="width:700px;margin:auto">
+             <!-- <template slot-scope="{ row, index }" slot="cid">
+                <Select style="width:150px" v-model="outgoingCertificatesList[0].cid" :disabled="index>0"> 
                   <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
                 </Select>
-            </template>
+            </template> -->
             <!-- 工序 -->
-            <template slot-scope="{row, index }" slot="detailProcedures">
+            <!-- <template slot-scope="{row, index }" slot="detailProcedures">
               <CheckboxGroup v-model="outgoingCertificatesList[0].detailProcedures">
-                  <Checkbox label="横机" :disabled="index==1"></Checkbox>
-                  <Checkbox label="套口" :disabled="index==1"></Checkbox>
-                  <Checkbox label="洗整" :disabled="index==1"></Checkbox>
-                  <Checkbox label="包装" :disabled="index==1"></Checkbox>
+                  <Checkbox label="横机" :disabled="index>0"></Checkbox>
+                  <Checkbox label="套口" :disabled="index>0"></Checkbox>
+                  <Checkbox label="洗整" :disabled="index>0"></Checkbox>
+                  <Checkbox label="包装" :disabled="index>0"></Checkbox>
               </CheckboxGroup>
-            </template>
+            </template> -->
             <!-- 颜色 -->
             <template slot-scope="{ row, index }" slot="color">
-              <Select v-model="outgoingCertificatesList[index].color" style="width:65px" disabled>
+              <Select v-model="outgoingCertificatesList[index].color" disabled>
                 <Option  v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
               </Select>
             </template>
             <!-- 尺码 -->
             <template slot-scope="{ row, index }" slot="size">
-              <Select v-model="outgoingCertificatesList[index].size" style="width:60px" disabled>
+              <Select v-model="outgoingCertificatesList[index].size"  disabled>
                 <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
               </Select>
             </template>
             <!-- 数量 -->
             <template slot-scope="{ row, index }" slot="qty">
-              <Input style="width:60px" type="text" v-model="outgoingCertificatesList[index].qty"/>
+              <Input type="text" v-model="outgoingCertificatesList[index].qty"/>
             </template>
             <!-- 合同交期 -->
-            <template slot-scope="{ row, index }" slot="deliveryData">
-              <DatePicker style="width:127px" type="datetime" v-model="outgoingCertificatesList[0].detailDeliveryData" :disabled="index==1"></DatePicker>
-            </template>
+            <!-- <template slot-scope="{ row, index }" slot="deliveryData">
+              <DatePicker style="width:127px" type="datetime" v-model="outgoingCertificatesList[0].detailDeliveryData" :disabled="index>0"></DatePicker>
+            </template> -->
             <!-- 操作 -->
-            <template slot-scope="{ row,index }" slot="action">
+            <!-- <template slot-scope="{ row,index }" slot="action">
               <Button @click="addOutgoingClik(row,index)">增加</Button>
               <Button @click="deleteOutgoingClik(row,index)">删除</Button>
-            </template>
+            </template> -->
         </Table>
         <Spin ref="outgoingAloadding"></Spin>
       </div>
@@ -683,6 +688,7 @@ export default {
       }
     };
     return {
+      addOutgoing:{},
       addIndex:'',
       editIndexedit:-1,
       editIndex: 0,
@@ -708,14 +714,14 @@ export default {
         //   type: 'selection'
         // },
         {
-          title: "颜色",
-          align: "center",
-          slot: "certificatesColor",
-        },
-        {
           title: "尺码",
           align: "center",
           slot: "certificatesSize"
+        },
+        {
+          title: "颜色",
+          align: "center",
+          slot: "certificatesColor",
         },
         {
           title: "数量",
@@ -731,53 +737,49 @@ export default {
       //外加工单位表格
       outgoingColumns: [
         {
-          width:"44px",
           align:'center',
-          type: 'selection'
+          type: 'selection',
+          width:"50px"
         },
-        {
-          width:"170px",
-          title: '外加工单位',
-          align:'center',
-          slot: 'cid',
-        },
-        {
-          title: '工序',
-          align:'center',
-          width:'148px',
-          slot: 'detailProcedures'
-        },
-        {
-          title: '合同交期',
-          align:'center',
-          width:'147px',
-          slot: 'deliveryData',
-        },
+        // {
+        //   width:"170px",
+        //   title: '外加工单位',
+        //   align:'center',
+        //   slot: 'cid',
+        // },
+        // {
+        //   title: '工序',
+        //   align:'center',
+        //   width:'148px',
+        //   slot: 'detailProcedures'
+        // },
+        // {
+        //   title: '合同交期',
+        //   align:'center',
+        //   width:'147px',
+        //   slot: 'deliveryData',
+        // },
         {
           title: '颜色',
           align:'center',
           slot: 'color',
-          width:"83px"
         },
         {
           title: '尺码',
           align:'center',
           slot: 'size',
-          width:"78px"
         },
         {
           title: '数量',
           align:'center',
           slot: 'qty',
-          width:"78px"
         },
-       
-        {
-          title: '操作',
-          align:'center',
-          slot: 'action',
-          width: "160px"
-        },
+        // {
+        //   title: '操作',
+        //   align:'center',
+        //   slot: 'action',
+        //   width: "160px"
+        // },
       ],
       lookProduction: [
         {
@@ -923,8 +925,22 @@ export default {
           detailProcedures: "",
         }
       ],
+      certificatesListCb:[],
       editCertificatesList: [
         {
+          bzQty: "",
+          color: "",
+          fzQty: "",
+          hjQty: "",
+          qty: "",
+          size: "",
+          tjQty: "",
+          ztQty: "",
+          moCode: ""
+        }
+      ],
+      editCertificatesListCb:[
+         {
           bzQty: "",
           color: "",
           fzQty: "",
@@ -993,12 +1009,6 @@ export default {
         procedures: [
           { required: true, validator: validatePass, trigger: "change" }
         ],
-        // unit:[
-        //     {required: true, message: "内容不能为空", trigger: "change" }
-        // ],
-        // qty:[
-        //     {required: true, message: "内容不能为空", trigger: "change" }
-        // ],
         color: [{ required: true, message: "内容不能为空", trigger: "change" }],
         size: [{ required: true, message: "内容不能为空", trigger: "change" }],
         brand: [{ required: true, message: "内容不能为空", trigger: "change" }]
@@ -1184,23 +1194,23 @@ export default {
     Spin
   },
   methods: {
-    //添加页面 表格 操作 按钮
+    //添加页面表格 操作 小按钮
     handleEdit (row, index) {    
       this.addColor = row.color;
       this.addSize = row.size;
       this.addQty = row.qty;
       this.editIndex = index;
       },
-    //添加页面 表格 保存 小按钮
+    //添加页面表格 保存 小按钮
     handleSave(index){
+      this.addIndex = index
       this.certificatesList[index].color=this.addColor;
       this.certificatesList[index].size=this.addSize;
       this.certificatesList[index].qty=this.addQty;
       this.editIndex = -1;
     },
-    //添加页面 表格 添加 小按钮
+    //添加页面表格 添加 小按钮
     handEditIndex(row,index){
-      this.addIndex = index
       this.handleSave(index)
       this.handleEdit(row,index+1)
       this.certificatesList.push({
@@ -1216,7 +1226,21 @@ export default {
         moId: "",
         detailDeliveryData:"",
         detailProcedures: "",
-      });
+      })
+      this.certificatesListCb.push({
+        bzQty: "",
+        color: "",
+        fzQty: "",
+        hjQty: "",
+        qty: "",
+        size: "",
+        tjQty: "",
+        ztQty: "",
+        moCode: "",
+        moId: "",
+        detailDeliveryData:"",
+        detailProcedures: "",
+      })
     },
 
     //编辑页面 表格 编辑 按钮
@@ -1235,9 +1259,21 @@ export default {
     },
     //编辑页面 表格 添加 小按钮
     edithandEditIndex(row,index){
-      // this. edithandleSave(index)
-      // this.edithandleEdit(row,index+1)
       this.editCertificatesList.push({
+        bzQty: "",
+        color: "",
+        fzQty: "",
+        hjQty: "",
+        qty: "",
+        size: "",
+        tjQty: "",
+        ztQty: "",
+        moCode: "",
+        moId: "",
+        detailDeliveryData:"",
+        detailProcedures: "",
+      });
+      this.editCertificatesListCb.push({
         bzQty: "",
         color: "",
         fzQty: "",
@@ -1256,6 +1292,8 @@ export default {
     },
     // 发送页面选择按钮
     selectTouch(selection){
+      // console.log(this.addOutgoing)
+      // console.log(selection)
       this.selectData = selection
     },
     //发送页面添加按钮
@@ -1367,17 +1405,6 @@ export default {
         });
       });
     },
-    // submit() {
-    //   this.$refs["productionRef"].validate(valid => {
-    //     if (valid) {
-    //       productionTasks(this.addProductionTask).then(res => {
-    //         this.value3 = false;
-    //       });
-    //     } else {
-    //       this.$Message.error("请填写正确信息");
-    //     }
-    //   });
-    // },
     addCertificatesEdit() {
       this.certificatesList.push({
         bzQty: "",
@@ -1424,17 +1451,9 @@ export default {
       });
     },
     handleRemove(index) {
-      // this.addProductionTask.qty=0
-      if (this.certificatesList.length > 1) {
+      if (this.certificatesListCb.length > 1) {
+        this.certificatesListCb.splice(index, 1);
         this.certificatesList.splice(index, 1);
-        this.editIndex = index-1
-        // let deleCount = 0;
-        // if(this.certificatesList.length){
-        //     this.certificatesList.forEach(val=>{
-        //         deleCount +=parseInt(val.qty)
-        //     })
-        //     this.addProductionTask.qty = deleCount
-        // }
       }
     },
     editHandleRemove(index, id) {
@@ -1523,13 +1542,17 @@ export default {
           res.data.content.forEach(val => {
             this.editCertificatesList.push(val);
           });
+          this.editCertificatesListCb = JSON.parse(JSON.stringify(this.editCertificatesList))
           this.$refs.Aloadding.toggleSpin = false;
         });
       });
     },
     //编辑页面的修改
     ok() {
-      this.editCertificatesList.forEach(val => {
+      console.log(this.editCertificatesListCb)
+      return
+      this.editCertificatesListCb.forEach(val => {
+        console.log(val)
         val.moCode = this.editorProductionTask.moCode;
         val.moId = this.editorProductionTask.id;
       });
@@ -1541,7 +1564,7 @@ export default {
         if (valid) {
           this.editorProductionTask.procedures = this.editorProductionTask.procedures.join(",")
           productionTaskEdit(this.editorProductionTask).then(res => {
-            this.editCertificatesList.forEach(val => {
+            this.editCertificatesListCb.forEach(val => {
             this.editorProductionTask.qty += parseInt(val.qty);
             delete val.deliveryData
             delete val.procedures
@@ -1552,7 +1575,7 @@ export default {
           });
             //尾部修改
             this.editInfo.jsonString = JSON.stringify(
-              this.editCertificatesList
+              this.editCertificatesListCb
             );
             modity(this.editInfo).then(res => {
               this.$Message.info("修改成功");
@@ -1586,6 +1609,7 @@ export default {
     },
     //新增显示按钮
     showAddRoad() {
+      this.addIndex = "";
       this.editIndex=0; 
       this.addColor = "";
       this.addSize = "";
@@ -1620,11 +1644,10 @@ export default {
       });
       this.$refs["productionRef"].validate(valid => {
         if (valid) {
-          // this.handleSave(this.addIndex+1)
           this.addProductionTask.procedures = this.addProductionTask.procedures.join(',')
           productionTasks(this.addProductionTask).then(res => {
             this.dataTable = res.content;
-            this.certificatesList.forEach(val => {
+            this.certificatesListCb.forEach(val => {
                 this.addProductionTask.qty += parseInt(val.qty);
                 val.detailDeliveryData = res.data.deliveryData;
                 val.detailProcedures = res.data.procedures;
@@ -1658,7 +1681,8 @@ export default {
     userList().then(res => {
       this.constomer = res.data.content;
     });
-  }
+    this.certificatesListCb = JSON.parse(JSON.stringify(this.certificatesList))
+  },
 };
 </script>
 <style scope>
