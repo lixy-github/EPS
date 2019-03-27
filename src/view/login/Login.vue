@@ -19,7 +19,9 @@
                     <Checkbox v-model="loginForm.rememberPwd">记住密码</Checkbox>
                 </div>
                 <FormItem>
-                    <Button type="primary" long size="large" @click="loginSubmit()">登录</Button>
+                    <Button type="primary" :loading="loading" long size="large" @click="loginSubmit()">
+                        登录
+                    </Button>
                 </FormItem>
             </Form>
             <div class="form-other clearfix">
@@ -46,8 +48,9 @@
                         <Input type="password" v-model="registerPhone.confirmPwd" placeholder="请再次输入密码"/>
                     </FormItem>
                     <div class="cell-code" >
-                        <FormItem style="margin-bottom: 0px;"  prop="verificationCode">
+                        <FormItem style="margin-bottom: 0px;width: 62%;"  prop="verificationCode">
                             <Input v-model="registerPhone.verificationCode"  placeholder="请输入图片验证码"/>
+                            <p v-if="codeFalse" class="code-hint">验证码不正确</p>
                         </FormItem>
                         <div>
                             <img style="display:block; margin:0px 0 6px 0;" :src="imgValidateCode.base64">
@@ -55,7 +58,7 @@
                         </div>
                     </div>
                     <div class="cell-code" >
-                        <FormItem style="margin-bottom: 0px;"  prop="phoneCode">
+                        <FormItem style="margin-bottom: 0px; width: 62%;"  prop="phoneCode">
                             <Input v-model="registerPhone.phoneCode"  placeholder="请输入手机验证码"/>
                         </FormItem>
                         <div>
@@ -70,7 +73,7 @@
                         </span>
                     </div>
                     <FormItem>
-                        <Button type="primary" long size="large" @click="loginSubmitp()">注册</Button>
+                        <Button type="primary" :disabled="isCellSelection" long size="large" @click="loginSubmitp()">注册</Button>
                     </FormItem>
                 </Form>
                 <div class="back-login">
@@ -97,7 +100,7 @@
                         <Input type="password" v-model="registerEmail.confirmPwd" placeholder="请确认密码"/>
                     </FormItem>
                     <div class="email-code" >
-                        <FormItem style="margin-bottom: 0px;"  prop="emailCode">
+                        <FormItem style="margin-bottom: 0px;width: 62%;"  prop="emailCode">
                             <Input v-model="registerEmail.emailCode" placeholder="请输入邮箱动态码"/>
                         </FormItem>
                         <div>
@@ -112,7 +115,7 @@
                         </span>
                     </div>
                     <FormItem>
-                        <Button type="primary" @click="emailhanld" long size="large">注册</Button>
+                        <Button type="primary" :disabled="isEmailSelection" @click="emailhanld" long size="large">注册</Button>
                     </FormItem>
                 </Form>
                 <div class="back-login">
@@ -224,8 +227,10 @@ export default {
         const phoneImgCode = (rule, value, callback) => {
             if(value.length==0) {
                 callback(new Error("验证码不能为空"))
+                this.codeFalse = false;
             } else if(value.length < 4) {
                 callback(new Error("验证码不能小于图片显示的位数"))
+                this.codeFalse = false;
             } else {
                 callback();
             }
@@ -240,6 +245,7 @@ export default {
             }
         }
         return {
+            loading: false,
             loginForm: {
                 username: "",
                 password: "",
@@ -259,9 +265,13 @@ export default {
             position: "left",
             isCellBtnState: false,
             isEamilBtnState: false,
-            cellBtnTimeMsg:"点击获取短信验证码",
-            emailBtnTimeMsg: "点击获取邮箱验证码",
-            totalTime: 5,
+            codeFalse: false,
+            cellBtnTimeMsg:"获取验证码",
+            emailBtnTimeMsg: "获取验证码",
+            isCodeUpdate: {
+                cellUpdata: false,
+                status: Number
+            },
             registerPhone: {
                 username: "",
                 password: "",
@@ -293,7 +303,6 @@ export default {
                     { validator:validateRePwd, trigger: 'blur' }
                 ],
                 verificationCode: [
-                    { required: true, message: '请输入图片验证码', trigger: 'blur' },
                     { validator:phoneImgCode, trigger: 'blur' }
                 ],
                 phoneCode: [
@@ -326,6 +335,32 @@ export default {
                     { required: true, message: '请输入邮箱动态码', trigger: 'blur' },
                     { validator:validateEmailCode, trigger: 'blur' }
                 ]
+            },
+            isEmailSelection: true,
+            isCellSelection: true
+        }
+    },
+    computed: {
+        emailAgreement () {
+            return this.registerEmail.agreement;
+        },
+        cellAgreement () {
+            return this.registerPhone.agreement;
+        },
+    },
+    watch: {
+        emailAgreement (val) {
+            if (val) {
+                this.isEmailSelection = false;
+            } else {
+                this.isEmailSelection = true;
+            }
+        },
+        cellAgreement (val) {
+            if (val) {
+                this.isCellSelection = false;
+            } else {
+                this.isCellSelection = true;
             }
         }
     },
@@ -334,11 +369,11 @@ export default {
         loginSubmit() {
             this.$refs['loginForm'].validate((valid) => {
                 if(valid){
+                    this.loading = true;
                     login(this.loginForm).then(res => {
                         Storage.set('token', res.token);
                         Storage.set('username', this.loginForm.username);
                         Storage.set('remberPwd', this.loginForm.rememberPwd);
-                        console.log(this.loginForm.rememberPwd)
                         if (this.loginForm.rememberPwd) {
                             Storage.set('password', this.loginForm.password);
                         } else {
@@ -347,6 +382,7 @@ export default {
                         this.$router.push("/index/Index");
                     }).catch(err=>{
                         this.$Message.error(err.response.data);
+                        this.loading = false;
                     })
                 }
             })
@@ -364,6 +400,7 @@ export default {
                         if (res.code === 200) {
                             this.$Message.info("注册成功!");
                             this.register = false;
+                            this.$refs.registerPhone.resetFields();
                         } else {
                             this.$Message.error(res.message);
                         }
@@ -385,8 +422,9 @@ export default {
                             this.$Message.info("注册成功!");
                             this.email = false;
                             this.register = false;
+                            this.$refs.registerEmail.resetFields();
                         } else {
-                            this.$Message.error("注册失败!"+ res.message);
+                            this.$Message.error("注册失败!" + res.message);
                         }
                         
                     })
@@ -421,13 +459,12 @@ export default {
                 this.imgValidateCode.uuid = res.data.uuid;
             })
         },
-        // 点击图片更换图片验证码
+        // 点击更换图片验证码
         replaceCode() {
             this.getImgCode();
         },
-        // 计时按钮
+        // 发送手机验证码
         timeBtn () {
-            // console.log(this.registerPhone)
             let propUsername, propPhone;
             this.$refs['registerPhone'].validateField('username', err => {
                 propUsername = err;
@@ -435,25 +472,37 @@ export default {
             this.$refs['registerPhone'].validateField('verificationCode', err => {
                 propPhone = err;
             })
-            console.log(propUsername)
             if (!propUsername && !propPhone) {
                 this.getPhoneCode.imageCode = this.registerPhone.verificationCode;
                 this.getPhoneCode.uuid = this.imgValidateCode.uuid;
                 this.getPhoneCode.phone = this.registerPhone.username;
                 phoneVerification(this.getPhoneCode).then(res => {
                     if (res.code === 200) {
+                        this.codeFalse = false;
                         if (this.register) {
                             this.isCellBtnState = true;
-                            this.VerificationCodeTime("短信验证码已发送");
+                            let totalTime = 60;
+                            this.cellBtnTimeMsg = totalTime + '秒后重新获取'
+                            let timer = window.setInterval(() => {
+                                totalTime--
+                                this.cellBtnTimeMsg = totalTime + '秒后重新获取'
+                                if (totalTime < 0) {
+                                    window.clearInterval(timer);
+                                    this.isCellBtnState = false;
+                                    this.cellBtnTimeMsg = '获取验证码';
+                                    totalTime = 60;
+                                }
+                            },1000)
                         }
                     } else {
-                        this.$Message.error(res.message+'，请尝试刷新图片');
+                        this.codeFalse = true;
                     }
                 }).catch(err => {
                     this.$Message.error("发送失败");
                 })
             }
         },
+        // 发送邮箱验证码
         emailTimeBtn () {
             const getEmailCode = {
                 email: this.registerEmail.username
@@ -467,7 +516,7 @@ export default {
                     if (res.code === 200) {
                         console.log(this.email)
                         if (this.email) {
-                            let emailTotalTime = 5;
+                            let emailTotalTime = 60;
                             this.isEamilBtnState = true;
                             this.$Message.info("邮箱验证码已发送");
                             this.emailBtnTimeMsg = emailTotalTime + '秒后重新获取'
@@ -477,8 +526,8 @@ export default {
                                 if (emailTotalTime < 0) {
                                     window.clearInterval(timer);
                                     this.isEamilBtnState = false;
-                                    this.emailBtnTimeMsg = '重新发送验证码';
-                                    emailTotalTime = 5;
+                                    this.emailBtnTimeMsg = '获取验证码';
+                                    emailTotalTime = 60;
                                 }
                             },1000)
                         } 
@@ -489,21 +538,6 @@ export default {
                     console.log(err)
                 })
             }
-        },
-        // 验证码计时器
-        VerificationCodeTime (Hint) {
-            this.$Message.info(Hint);
-            this.cellBtnTimeMsg = this.totalTime + '秒后重新获取'
-            let timer = window.setInterval(() => {
-                this.totalTime--
-                this.cellBtnTimeMsg = this.totalTime + '秒后重新获取'
-                if (this.totalTime < 0) {
-                    window.clearInterval(timer);
-                    this.isCellBtnState = false;
-                    this.cellBtnTimeMsg = '重新发送验证码';
-                    this.totalTime = 5;
-                }
-            },1000)
         }
     },
     mounted() {
@@ -519,6 +553,9 @@ export default {
         if (remberPwd) {
             this.loginForm.password = password;
         }
+    },
+    beforeDestroy() {
+        this.loading = false;
     }
 }
 </script>
@@ -602,7 +639,6 @@ export default {
 .cell-code,.email-code{
     display: flex;
     justify-content: space-between;
-    /* align-items: center; */
     margin-bottom: 20px;
 }
 .replace-img{
@@ -610,5 +646,9 @@ export default {
     color: rgb(29, 147, 205);
     cursor: pointer;
     text-align: center;
+}
+.code-hint{
+    color: rgb(237, 64, 20);
+    line-height: 22px;
 }
 </style>
