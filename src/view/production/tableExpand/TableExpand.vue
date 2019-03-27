@@ -162,7 +162,7 @@
             </template>
             <!-- 数量 -->
             <template slot-scope="{ row, index }" slot="qty">
-              <Input type="text" v-model="editCertificatesListCb[index].qty"/>
+              <Input type="text" v-model="editCertificatesListCb[index].qty" @on-keyup="TableE($event)"/>
             </template>
             <!-- 合同交期 -->
             <!-- <template slot-scope="{ row, index }" slot="deliveryData">
@@ -175,6 +175,7 @@
               <!-- <Button type="success" @click="okList">修改</Button> -->
             <!-- </template> -->
         </Table>
+        <div style="margin-left: 732px;color:red;" v-if="isShow">不能超过总数量</div>
          <!-- <Spin ref="Outsourcingtasks"></Spin> -->
       </div>
 
@@ -271,6 +272,7 @@ export default {
   },
   data() {
     return {
+      isShow:false,
       editCertificatesListCb:[
         {
           outgoingId: "",
@@ -295,34 +297,35 @@ export default {
       checkboxarr: [],
       tscheckboxarr: [],
       outgoingTile: [
-        {
-          width:"44px",
-          align:'center',
+        // {
+          // width:"44px",
+          // align:'center',
           // type: 'selection',
           // slot: 'selects'
-          render: (h, params) => {
-            return h('CheckboxGroup', {
-              props: {
-                value: this.checkboxarr
-              },
-              on: {
-                'on-change': (data) => {
-                  this.checkboxarr = data
-                  // this.tscheckboxarr.push(...data)
-                  // console.log(this.tscheckboxarr)
-                  // this.checkboxarr = [...new Set(this.tscheckboxarr)]
-                  console.log(this.checkboxarr)
-                }
-              }
-            }, [
-              h('Checkbox', {
-                props: {
-                  label: params.row.id
-                }
-              })
-            ], '')
-          }
-        },
+          // render: (h, params) => {
+          //   return h('CheckboxGroup', {
+          //     props: {
+          //       value: this.checkboxarr
+          //     },
+          //     on: {
+          //       'on-change': (data) => {
+          //         this.checkboxarr = data
+          //         console.log(this.checkboxarr)
+          //         // this.tscheckboxarr.push(...data)
+          //         // console.log(this.tscheckboxarr)
+          //         // this.checkboxarr = [...new Set(this.tscheckboxarr)]
+          //         // console.log(this.checkboxarr)
+          //       }
+          //     }
+          //   }, [
+          //     h('Checkbox', {
+          //       props: {
+          //         label: params.index
+          //       }
+          //     })
+          //   ], '')
+          // }
+        // },
         // {
         //   width:"170px",
         //   title: '外加工单位',
@@ -598,9 +601,19 @@ export default {
     };
   },
   methods: {
+    TableE(e){
+      let a = 0
+      this.editCertificatesListCb.forEach(val => {
+        a += parseInt(val.qty)
+      })
+     if(a>this.editorProductionTask.qty){
+       this.isShow = true
+     }else{
+       this.isShow = false
+     }
+    },
     // 发送页面选择按钮
     selectTouch(selection){
-      console.log(selection)
       this.editSelectData = selection
     },
     //发送页面添加按钮

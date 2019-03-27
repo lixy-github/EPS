@@ -182,7 +182,7 @@
           </template>
           <!-- 数量 -->
           <template slot-scope="{ row, index }" slot="certificatesQty">
-            <Input  type="text" v-model="certificatesListCb[index].qty"/>
+            <Input @on-keyup="countClik($event)" type="text" v-model="certificatesListCb[index].qty"/>
           </template>
           <!-- 操作 -->
           <template slot-scope="{ row, index }" slot="certificatesAction">
@@ -192,6 +192,7 @@
             </div>
           </template>
         </Table> 
+        <div style="margin-left: 528px;color:red;" v-if="isShow">不能超过总数量</div>
         <!-- <Spin ref="Aloadding"></Spin> -->
       </div>
 
@@ -211,7 +212,7 @@
           :rules="productionRules"
           :label-width="100"
           inline
-        >
+         >
           <!-- 上传照片 -->
           <FormItem label="照片" prop="photo">
             <div
@@ -355,7 +356,7 @@
           </template>
           <!-- 数量 -->
           <template slot-scope="{ row, index }" slot="certificatesQty">
-            <Input  type="text" v-model="editCertificatesListCb[index].qty" />
+            <Input  type="text" v-model="editCertificatesListCb[index].qty" @on-keyup="eidCount($event)"/>
           </template>
           <!-- 操作 -->
           <template slot-scope="{ row, index }" slot="certificatesAction">
@@ -366,6 +367,7 @@
             </div>
           </template>
         </Table> 
+        <div style="margin-left: 528px;color:red;" v-if="isShow">不能超过总数量</div>
         <Spin ref="Aloadding"></Spin>
       </div>
 
@@ -491,7 +493,10 @@
           </FormItem>
         </Form>
         </div>
-        <Table ref="outgoingselection" :columns="outgoingColumns" :data="outgoingCertificatesList" @on-selection-change="selectTouch" style="margin:auto">
+        <div style="position: relative;top: 30px;z-index: 99;left: 23px;">
+          <Checkbox class="slectSize" v-model="All" @on-change="optionsAll">全选</Checkbox>
+        </div>
+        <Table ref="outgoingselection" :columns="outgoingColumns" :data="outgoingCertificatesList" style="margin:auto">
              <!-- <template slot-scope="{ row, index }" slot="cid">
                 <Select style="width:150px" v-model="outgoingCertificatesList[0].cid" :disabled="index>0"> 
                   <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
@@ -511,17 +516,17 @@
               <!-- <Select v-model="outgoingCertificatesList[index].color" disabled>
                 <Option  v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
               </Select> -->
-              <Input type="text" v-model="outgoingCertificatesList[index].color" disabled/>
+              <Input type="text" v-model="outgoingCertificatesListCb[index].color" disabled/>
             </template>
             <!-- 尺码 -->
             <template slot-scope="{ row, index }" slot="size">
-              <Select v-model="outgoingCertificatesList[index].size"  disabled>
+              <Select v-model="outgoingCertificatesListCb[index].size"  disabled>
                 <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
               </Select>
             </template>
             <!-- 数量 -->
             <template slot-scope="{ row, index }" slot="qty">
-              <Input type="text" v-model="outgoingCertificatesList[index].qty"/>
+              <Input type="text" v-model="outgoingCertificatesListCb[index].qty" @on-keyup="sendCount($event)"/>
             </template>
             <!-- 合同交期 -->
             <!-- <template slot-scope="{ row, index }" slot="deliveryData">
@@ -533,6 +538,7 @@
               <Button @click="deleteOutgoingClik(row,index)">删除</Button>
             </template> -->
         </Table>
+        <div style="margin-left: 732px;color:red;" v-if="isShow">不能超过总数量</div>
         <Spin ref="outgoingAloadding"></Spin>
       </div>
       <div slot="footer">
@@ -661,6 +667,24 @@ export default {
       }
     };
     return {
+      All:false,
+      isShow:false,
+      outgoingCertificatesListCb:[
+        {
+          bzQty: "",
+          color: "",
+          fzQty: "",
+          hjQty: "",
+          qty: "",
+          size: "",
+          tjQty: "",
+          ztQty: "",
+          moCode: "",
+          outgoingId: "",
+          procedures:[],
+          deliveryData:"",
+        }
+      ],
       addOutgoing:{},
       addIndex:'',
       editIndexedit:-1,
@@ -675,6 +699,8 @@ export default {
       count: 0,
       data10: [],
       viewContent: {},
+      selectIndex:[],
+      selectAll:[],
       search: {
         moCode: ""
       },
@@ -711,8 +737,62 @@ export default {
       outgoingColumns: [
         {
           align:'center',
-          type: 'selection',
-          width:"50px"
+          width:"50px",
+          // renderHeader: (h, params) => {
+          // return h('CheckboxGroup', {
+          //   props:{
+              
+          //   },
+          //   on: {
+          //     'on-change': (data) => {
+          //       this.selectAll = data
+          //     }
+          //   }
+          // },[
+          //   h('Checkbox',{
+          //     props: {
+          //       label:'-1'
+          //     },
+          //     style:{
+          //       position:'relative',
+          //       top:'10px',
+          //       left:'4px',
+          //     }
+          //   },[
+          //     h('span','')
+          //   ])
+          // ]);
+          // },
+          render: (h,params) => {
+            return h('CheckboxGroup',{
+              props: {
+                value:this.selectIndex
+              },
+              on: {       
+                'on-change': (data) => {
+                  this.selectIndex = data
+                  if(data.length<this.outgoingCertificatesListCb.length){
+                    this.All = false
+                  }else if(data.length==this.outgoingCertificatesListCb.length){
+                    this.All = true
+                  }
+                }
+              }
+            },[
+              h('Checkbox',{
+                props: {
+                  label:params.index
+                },
+                style:{
+                    position:'relative',
+                    top:'10px',
+                    left:'4px'
+                }
+              }, [
+                h('span', '')
+              ])
+            ])
+          }
         },
         // {
         //   width:"170px",
@@ -1167,6 +1247,54 @@ export default {
     Spin
   },
   methods: {
+    //外发页面 全选
+    optionsAll(state){
+      let countI = []
+      this.outgoingCertificatesListCb.forEach( (val,index) =>{
+        countI.push(index)
+      })
+      if(state){
+        this.selectIndex = countI
+      }else{
+        this.selectIndex=[]
+      }
+    },
+    //新增 页面判断是否大于总数和
+    countClik(e){
+      let a = 0
+      this.certificatesListCb.forEach(val => {
+        a += parseInt(val.qty)
+      })
+     if(a>this.addProductionTask.qty){
+       this.isShow = true
+     }else{
+       this.isShow = false
+     }
+    },
+    //编辑 页面判断是否大于总数和
+    eidCount(e){
+      let a = 0
+      this.editCertificatesListCb.forEach(val => {
+        a += parseInt(val.qty)
+      })
+     if(a>this.editorProductionTask.qty){
+       this.isShow = true
+     }else{
+       this.isShow = false
+     }
+    },
+    //外发 页面判断是否大于总数和
+    sendCount(e){
+      let a = 0
+      this.outgoingCertificatesListCb.forEach(val => {
+        a += parseInt(val.qty)
+      })
+     if(a>this.outgoingProductionTask.qty){
+       this.isShow = true
+     }else{
+       this.isShow = false
+     }
+    },
     //添加页面表格 操作 小按钮
     handleEdit (row, index) {    
       this.addColor = row.color;
@@ -1263,10 +1391,6 @@ export default {
     },
     Touch(selection){
     },
-    // 发送页面选择按钮
-    selectTouch(selection){
-      this.selectData = selection
-    },
     //发送页面添加按钮
     addOutgoingClik(row,index){
       this.outgoingCertificatesList.push(row)
@@ -1279,9 +1403,14 @@ export default {
     },
     //发送
     okOutgoing() {
-      // if(this.selectData.length<1){
-      //   this.$refs.outgoingselection.selectAll(true);
-      // }
+      this.selectData = []
+      if(this.selectAll[0] == -1){
+         this.selectData = this.outgoingCertificatesListCb
+      }else{
+        this.selectIndex.forEach( val=> {
+          this.selectData.push(this.outgoingCertificatesListCb[val])
+        })
+      }
       this.selectData.forEach(val => {
         val.moCode = this.outgoingProductionTask.moCode;
         val.moId = this.outgoingProductionTask.id;
@@ -1352,7 +1481,8 @@ export default {
     },
     // 外发按钮
     outgoinghanldclick(row) {
-      this.selectData = [];
+      this.All = false
+      this.selectIndex =  []
       this.$refs.outgoingAloadding.toggleSpin = true;
       this.outgoing = true;
       productionTaskFindbyid(row.id).then(res => {
@@ -1370,6 +1500,7 @@ export default {
           });
           this.outgoingCertificatesList = res.data.content;
           this.addOutgoing = res.data.content[0];
+          this.outgoingCertificatesListCb = JSON.parse(JSON.stringify(res.data.content))
           this.$refs.outgoingAloadding.toggleSpin = false;
         });
       });
@@ -1421,8 +1552,18 @@ export default {
     },
     handleRemove(index) {
       if (this.certificatesListCb.length > 1) {
-        this.certificatesListCb.splice(index, 1);
-        this.certificatesList.splice(index, 1);
+          this.certificatesListCb.splice(index, 1);
+          this.certificatesList.splice(index, 1);
+        }
+      //判断是否显示超过总数提醒文字
+      let a = 0
+      this.certificatesListCb.forEach(val => {
+        a += parseInt(val.qty)
+      })
+      if(a>this.addProductionTask.qty){
+        this.isShow = true
+      }else{
+        this.isShow = false
       }
     },
     editHandleRemove(index,id) {
@@ -1433,6 +1574,15 @@ export default {
         this.editCertificatesListCb.splice(index, 1);
         this.editCertificatesList.splice(index, 1);
       }
+       let a = 0
+      this.editCertificatesListCb.forEach(val => {
+        a += parseInt(val.qty)
+      })
+     if(a>this.editorProductionTask.qty){
+       this.isShow = true
+     }else{
+       this.isShow = false
+     }
     },
     outgoingHandleRemove(index, id) {
       if (id) {
@@ -1531,7 +1681,6 @@ export default {
           this.editorProductionTask.procedures = this.editorProductionTask.procedures.join(",")
           productionTaskEdit(this.editorProductionTask).then(res => {
             this.editCertificatesListCb.forEach(val => {
-            this.editorProductionTask.qty += parseInt(val.qty);
             delete val.deliveryData
             delete val.procedures
             val.detailDeliveryData = ""
@@ -1725,5 +1874,10 @@ export default {
 .ivu-input[disabled], fieldset[disabled],
 .ivu-select.ivu-select-disabled .ivu-select-selection{
   background-color: white;
+}
+.slectSize {
+  font-weight: 490;
+  color: #515a6e;
+  font-size: 12px;
 }
 </style>
