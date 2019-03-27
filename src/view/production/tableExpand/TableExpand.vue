@@ -35,13 +35,14 @@
           </FormItem>
           <div style="margin-top: -127px;margin-left: 263px;">
             <FormItem label="客户名称" prop="custom" style="width:240px">
-              <Select v-model="editorProductionTask.custom" filterable>
+              <!-- <Select v-model="editorProductionTask.custom" filterable>
                 <Option
                   v-for="item in this.constomer"
                   :value="item.id"
                   :key="item.username"
                 >{{item.username}}</Option>
-              </Select>
+              </Select> -->
+              <Input v-model="editorProductionTask.custom"/>
             </FormItem>
             <FormItem label="生产单号" prop="moCode">
               <Input v-model="editorProductionTask.moCode" disabled/>
@@ -117,42 +118,57 @@
             <Button type="primary" style="margin-left: 6px;" @click="editHandleRemove(index,item.id)">删除</Button>
           </FormItem>
         </Form> -->
-        
-        <Table ref="selection" :columns="outgoingTile" :data="editCertificatesList" @on-selection-change="selectTouch">
-            <template slot-scope="{ row, index }" slot="cid">
+        <div style="display:flex;margin:auto;justify-content:center">
+        <Form  :label-width="90" :model="addOutgoingTable" inline>
+          <FormItem label="外加工单位" prop="custom" style="width:250px">
+            <Select filterable v-model="addOutgoingTable.cid">
+              <Option v-for="item in this.constomer" :value="item.id" :key="item.username">{{item.username}}</Option>
+            </Select>
+          </FormItem>
+          <FormItem label="合同交期" prop="detailDeliveryData" style="width:250px">
+            <DatePicker type="datetime" v-model="addOutgoingTable.detailDeliveryData"></DatePicker>
+          </FormItem>
+          <FormItem label="工序" prop="detailProcedures" style="min-width:287px">
+            <Select v-model="addOutgoingTable.detailProcedures" multiple>
+              <Option v-for="item in Process" :key="item.value" :value="item.value">{{item.label}}</Option>
+            </Select>
+          </FormItem>
+        </Form>
+        </div>
+        <Table ref="selection" :columns="outgoingTile" :data="editCertificatesList" @on-selection-change="selectTouch" style="margin:auto">
+            <!-- <template slot-scope="{ row, index }" slot="cid">
               <Select style="width:150px;" v-model="editCertificatesList[0].cid" :disabled="index>0"> 
                 <Option v-for="item in constomer" :value="item.id" :key="item.id">{{item.username}}</Option>
               </Select>
-            </template>
+            </template> -->
             <!-- 工序 -->
-            <template slot-scope="{row, index }" slot="procedures">
-              <CheckboxGroup v-model="editCertificatesList[0].detailProcedures" style="width:150px">
-                  <Checkbox label="横机" :disabled="index>0"></Checkbox>
-                  <Checkbox label="套口" :disabled="index>0"></Checkbox>
-                  <Checkbox label="洗整" :disabled="index>0"></Checkbox>
-                  <Checkbox label="包装" :disabled="index>0"></Checkbox>
+            <!-- <template slot-scope="{row, index }" slot="selects">
+              <CheckboxGroup  v-model="social" style="width:150px">
+                  <Checkbox label="index"></Checkbox>
+                 
               </CheckboxGroup>
-            </template>
+            </template> -->
             <!-- 颜色 -->
             <template slot-scope="{ row, index }" slot="color">
-              <Select v-model="editCertificatesList[index].color" style="width:65px">
+              <!-- <Select v-model="editCertificatesList[index].color">
                 <Option  v-for="item in allColour" :value="item.value" :key="item.value">{{item.label}}</Option>
-              </Select>
+              </Select> -->
+              <Input type="text" v-model="editCertificatesListCb[index].color"/>
             </template>
             <!-- 尺码 -->
             <template slot-scope="{ row, index }" slot="size">
-              <Select v-model="editCertificatesList[index].size" style="width:60px">
+              <Select v-model="editCertificatesListCb[index].size">
                 <Option v-for="item in size" :value="item.value" :key="item.value">{{item.label}}</Option>
               </Select>
             </template>
             <!-- 数量 -->
             <template slot-scope="{ row, index }" slot="qty">
-              <Input style="width:60px" type="text" v-model="editCertificatesList[index].qty"/>
+              <Input type="text" v-model="editCertificatesListCb[index].qty"/>
             </template>
             <!-- 合同交期 -->
-            <template slot-scope="{ row, index }" slot="deliveryData">
+            <!-- <template slot-scope="{ row, index }" slot="deliveryData">
               <DatePicker type="datetime" v-model="editCertificatesList[0].detailDeliveryData" :disabled="index>0"></DatePicker>
-            </template>
+            </template> -->
             <!-- 操作 -->
             <!-- <template slot-scope="{row}" slot="action"> -->
               <!-- <Button @click="addOutgoingClik(row,index)">增加</Button> -->
@@ -215,11 +231,8 @@
         <span style="font-size:16px;margin-right:17px">品牌:
           <span style="font-size:14px">{{viewContent.brand}}</span>
         </span>
-        <span style="font-size:16px;margin-right:17px">计量单位:
-          <span style="font-size:14px">{{viewContent.unit}}</span>
-        </span>
         <span style="font-size:16px;margin-right:17px">总数量:
-          <span style="font-size:14px">{{viewContent.qty}}</span>
+          <span style="font-size:14px">{{viewContent.qty}} {{viewContent.unit}}</span>
         </span>
       </div>
       <div style="float: left;margin-top:-51px ;margin-left: 222px;">
@@ -259,6 +272,22 @@ export default {
   },
   data() {
     return {
+      editCertificatesListCb:[
+        {
+          outgoingId: "",
+          cid: "",
+          bzQty: "",
+          color: "",
+          fzQty: "",
+          hjQty: "",
+          qty: "",
+          size: "",
+          tjQty: "",
+          ztQty: "",
+          moCode: ""
+        }
+      ],
+      addOutgoingTable:{},
       ed:true,
       viewContent: {},
       view:false,
@@ -268,35 +297,36 @@ export default {
         {
           width:"44px",
           align:'center',
-          type: 'selection',
+          // type: 'selection',
+          slot: 'selects'
         },
+        // {
+        //   width:"170px",
+        //   title: '外加工单位',
+        //   align:'center',
+        //   slot: 'cid',
+        // },
+        // {
+        //   title: '工序',
+        //   align:'center',
+        //   width:"170px",
+        //   slot: 'procedures'
+        // },
+        // {
+        //   title: '合同交期',
+        //   align:'center',
+        //   width:"190px",
+        //   slot: 'deliveryData',
+        // },
         {
-          width:"170px",
-          title: '外加工单位',
+          title: '尺码',
           align:'center',
-          slot: 'cid',
-        },
-        {
-          title: '工序',
-          align:'center',
-          width:"170px",
-          slot: 'procedures'
-        },
-        {
-          title: '合同交期',
-          align:'center',
-          width:"190px",
-          slot: 'deliveryData',
+          slot: 'size',
         },
         {
           title: '颜色',
           align:'center',
           slot: 'color',
-        },
-        {
-          title: '尺码',
-          align:'center',
-          slot: 'size',
         },
         {
           title: '数量',
@@ -598,17 +628,19 @@ export default {
       this.$nextTick(() => {
         this.editor = false;
       });
-      if(this.editSelectData[0].cid){
-        this.editorProductionTask.cid = this.editSelectData[0].cid
+      if(this.addOutgoingTable.cid){
+        this.editorProductionTask.cid = this.addOutgoingTable.cid
       }
       this.editorProductionTask.procedures = this.editorProductionTask.procedures.join(",")
       // this.editorProductionTask.cid=this.editSelectData.cid 
       productionTaskEdit(this.editorProductionTask).then( res => {
         //修改尾部
-          this.editSelectData.forEach(val => {
+          this.editCertificatesListCb.forEach(val => {
             // this.editorProductionTask.qty += parseInt(val.qty);
             // val.moCode = this.editorProductionTask.moCode;
             // val.moId = res.data.id;
+            val.detailDeliveryData = this.addOutgoingTable.detailDeliveryData;
+            val.detailProcedures = this.addOutgoingTable.detailProcedures;
             if(typeof val.detailProcedures != "string"){
               val.detailProcedures = val.detailProcedures.join(",")
             }
@@ -677,7 +709,9 @@ export default {
           val.detailProcedures = val.detailProcedures.split(",")
           val.cid = res.data[1].productionTasks.cid;
         })
-        this.editCertificatesList =  res.data[0].dcMoDetail
+        this.editCertificatesList =  res.data[0].dcMoDetail;
+        this.addOutgoingTable = res.data[0].dcMoDetail[0]
+        this.editCertificatesListCb = JSON.parse(JSON.stringify(this.editCertificatesList))
         // this.$refs.Outsourcingtasks.toggleSpin = false
       })
       // productiontasksFindall(this.searchalls).then(res => {
