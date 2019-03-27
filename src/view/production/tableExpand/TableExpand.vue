@@ -176,7 +176,12 @@
             <!-- </template> -->
         </Table>
         <div style="margin-left: 732px;color:red;" v-if="isShow">不能超过总数量</div>
-         <!-- <Spin ref="Outsourcingtasks"></Spin> -->
+        <!-- <Spin ref="Aloadding"></Spin> -->
+        <div v-if="spinShow">
+          <Spin fix>
+                <Icon type="ios-loading" size=30 class="demo-spin-icon-load"></Icon>
+            </Spin>
+        </div>
       </div>
 
       <div slot="footer">
@@ -196,6 +201,11 @@
           </div>
         </template>
       </Table>
+      <div v-if="spinShow">
+        <Spin fix>
+            <Icon type="ios-loading" size=30 class="demo-spin-icon-load"></Icon>
+        </Spin>
+      </div>
     </div>
   </div>
   <div>
@@ -243,9 +253,14 @@
       <div style="margin-top:20px">
         <Table :columns="lookProduction" :data="data10" border></Table>
       </div>
-      <!-- <Spin ref="lookAloadding"></Spin> -->
+      <div v-if="spinShow">
+        <Spin fix>
+              <Icon type="ios-loading" size=30 class="demo-spin-icon-load"></Icon>
+          </Spin>
+      </div>
     </Drawer>
   </div>
+  
 </div>  
 </template>
 <script>
@@ -272,6 +287,7 @@ export default {
   },
   data() {
     return {
+      spinShow:true,
       isShow:false,
       editCertificatesListCb:[
         {
@@ -644,6 +660,7 @@ export default {
           val.detailProcedures = val.detailProcedures.split(",")
         })
         this.data10 =  res.data[0].dcMoDetail
+        this.spinShow = false
         // this.$refs.Outsourcingtasks.toggleSpin = false
       })
     },
@@ -658,6 +675,7 @@ export default {
         });
       });
       this.dataTable = aaa;
+      this.spinShow = false
     },
     //修改确定
     okList() {
@@ -733,7 +751,6 @@ export default {
     },
     //编辑
     edit(row) {
-      // this.$refs.Outsourcingtasks.toggleSpin = true
       this.editor = true;
       this.searchalls.id = row.id;
       let footerDate = [];
@@ -749,7 +766,7 @@ export default {
         this.editCertificatesList =  res.data[0].dcMoDetail;
         this.addOutgoingTable = res.data[0].dcMoDetail[0]
         this.editCertificatesListCb = JSON.parse(JSON.stringify(this.editCertificatesList))
-        // this.$refs.Outsourcingtasks.toggleSpin = false
+        this.spinShow = false
       })
       // productiontasksFindall(this.searchalls).then(res => {
       //   res.data.content[0].procedures = res.data.content[0].procedures.split(",")
@@ -779,4 +796,17 @@ export default {
 };
 </script>
 <style scoped>
+  .demo-spin-icon-load{
+        animation: ani-demo-spin 1s linear infinite;
+    }
+    @keyframes ani-demo-spin {
+        from { transform: rotate(0deg);}
+        50%  { transform: rotate(180deg);}
+        to   { transform: rotate(360deg);}
+    }
+    .demo-spin-col{
+        height: 100px;
+        position: relative;
+        border: 1px solid #eee;
+    }
 </style>
