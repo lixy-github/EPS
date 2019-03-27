@@ -142,10 +142,9 @@
               </Select>
             </template> -->
             <!-- 工序 -->
-            <!-- <template slot-scope="{row, index }" slot="selects">
-              <CheckboxGroup  v-model="social" style="width:150px">
-                  <Checkbox label="index"></Checkbox>
-                 
+            <!-- <template slot-scope="{row, index }" slot="selects" v-for="i in editCertificatesList.length">
+              <CheckboxGroup :key='i' @on-change="test">
+                  <Checkbox>{{index}}</Checkbox>
               </CheckboxGroup>
             </template> -->
             <!-- 颜色 -->
@@ -293,12 +292,36 @@ export default {
       view:false,
       data10:[],
       editSelectData:[],
+      checkboxarr: [],
+      tscheckboxarr: [],
       outgoingTile: [
         {
           width:"44px",
           align:'center',
           // type: 'selection',
-          slot: 'selects'
+          // slot: 'selects'
+          render: (h, params) => {
+            return h('CheckboxGroup', {
+              props: {
+                value: this.checkboxarr
+              },
+              on: {
+                'on-change': (data) => {
+                  this.checkboxarr = data
+                  // this.tscheckboxarr.push(...data)
+                  // console.log(this.tscheckboxarr)
+                  // this.checkboxarr = [...new Set(this.tscheckboxarr)]
+                  console.log(this.checkboxarr)
+                }
+              }
+            }, [
+              h('Checkbox', {
+                props: {
+                  label: params.row.id
+                }
+              })
+            ], '')
+          }
         },
         // {
         //   width:"170px",
@@ -577,6 +600,7 @@ export default {
   methods: {
     // 发送页面选择按钮
     selectTouch(selection){
+      console.log(selection)
       this.editSelectData = selection
     },
     //发送页面添加按钮
