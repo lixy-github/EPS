@@ -11,6 +11,7 @@ import '../src/assets/css/public.css'
 import App from './App'
 import $ from 'jquery'
 import './my-theme/index.less'
+import store from './vuex/index'
 
 Vue.config.productionTip = false
 
@@ -21,6 +22,7 @@ Vue.use(AxiosPlugin)
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })

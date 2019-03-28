@@ -192,7 +192,7 @@
       
     </Modal>
     <div>
-      <Table border :columns="columns" :data="dataTable">
+      <Table border :columns="columns" :data="computedDataTable">
         <template slot-scope="{row, index}" slot="action">
           <div>
             <Icon type="ios-create-outline" size="20" @click="edit(row,index)"/>
@@ -201,7 +201,7 @@
           </div>
         </template>
       </Table>
-      <div v-if="spinShow">
+      <div v-if="computedSpinShow">
         <Spin fix>
             <Icon type="ios-loading" size=30 class="demo-spin-icon-load"></Icon>
         </Spin>
@@ -280,6 +280,9 @@ import {
   searlist,
   productionTaskEdit
 } from "../../../api/production/productionTask.js";
+import { mapActions, mapGetters } from 'vuex'
+
+
 export default {
   props: {
     row: Object,
@@ -287,6 +290,7 @@ export default {
   },
   data() {
     return {
+      saveDate:0,
       spinShow:true,
       isShow:false,
       editCertificatesListCb:[
@@ -581,7 +585,7 @@ export default {
           title: "数量",
           key: "qty",
           align: "center",
-          ellipsis: true
+          ellipsis: true,
         },
         {
           title: "交期",
@@ -616,7 +620,11 @@ export default {
       dataTable: []
     };
   },
+  computed: {
+    ...mapGetters(['computedDataTable', 'computedSpinShow'])
+  },
   methods: {
+    ...mapActions(['runGetTableData']),
     TableE(e){
       let a = 0
       this.editCertificatesListCb.forEach(val => {
@@ -666,16 +674,20 @@ export default {
     },
     // 表格数据
     getTableData() {
-      let aaa = [];
-      this.search.id = this.row.id;
-      outgoingEdit(this.search).then(res => {
-        res.data.content.forEach(val => {
-          val.deliveryData = this.row.deliveryData;
-          aaa.push(val);
-        });
-      });
-      this.dataTable = aaa;
-      this.spinShow = false
+      this.runGetTableData(this.row)
+      // let aaa = [];
+      // this.search.id = this.row.id;
+      // //尾部
+      // outgoingEdit(this.search).then(res => {
+      //   let saveId = ""; 
+      //   res.data.content.forEach(val => {
+      //     saveId = val.id
+      //     val.deliveryData = this.row.deliveryData;
+      //     aaa.push(val);
+      //   });
+      // });
+      // this.dataTable = aaa;
+      // this.spinShow = false
     },
     //修改确定
     okList() {
@@ -713,21 +725,6 @@ export default {
       // this.editInfo.jsonString = JSON.stringify(this.editSelectData);
       // modityUpdate(this.editInfo).then(res => {});
     },
-    //添加尾部
-    // addCertificates() {
-    //   this.editCertificatesList.push({
-    //     bzQty: "",
-    //     color: "",
-    //     fzQty: "",
-    //     hjQty: "",
-    //     qty: "",
-    //     size: "",
-    //     tjQty: "",
-    //     ztQty: "",
-    //     moCode: "",
-    //     moId: ""
-    //   });
-    // },
     //删除尾部
     editHandleRemove(index, id) {
       if (id) {
@@ -768,20 +765,6 @@ export default {
         this.editCertificatesListCb = JSON.parse(JSON.stringify(this.editCertificatesList))
         this.spinShow = false
       })
-      // productiontasksFindall(this.searchalls).then(res => {
-      //   res.data.content[0].procedures = res.data.content[0].procedures.split(",")
-      //   this.editorProductionTask = res.data.content[0];
-      //   //获取尾部数据
-      //   this.search.moCode = this.row.moCode;
-      //   outgoingEdit(this.search).then(res => {
-      //     this.editCertificatesList = [];
-      //     res.data.content.forEach(val => {
-      //       val.procedures = val.procedures.split(",")
-      //     });
-      //     this.editCertificatesList = res.data.content;
-         
-      //   });
-      // });
     },
     cancel() {
       this.editor = false;

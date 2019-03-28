@@ -109,10 +109,10 @@
             <Input v-model="addProductionTask.pins"/>
           </FormItem>
           <FormItem label="合同交期" prop="deliveryData" style="width:240px">
-            <DatePicker type="datetime" v-model="addProductionTask.deliveryData"></DatePicker>
+            <DatePicker type="date" v-model="addProductionTask.deliveryData"></DatePicker>
           </FormItem>
           <FormItem label="总数量" prop="qty">
-            <Input v-model="addProductionTask.qty"/>
+            <Input v-model="addProductionTask.qty" disabled placeholder="自动计算"/>
           </FormItem>
           <FormItem label="计量单位" prop="unit" style="width:240px;margin-left:8px">
             <Select v-model="addProductionTask.unit">
@@ -192,7 +192,7 @@
             </div>
           </template>
         </Table> 
-        <div style="margin-left: 528px;color:red;" v-if="isShow">不能超过总数量</div>
+        <div style="margin-left: 423px;color:red;" v-if="isShow">{{Prompt}}</div>
         <!-- <Spin ref="Aloadding"></Spin> -->
       </div>
 
@@ -280,10 +280,10 @@
             <Input v-model="editorProductionTask.pins"/>
           </FormItem>
           <FormItem label="合同交期" prop="deliveryData" style="width:240px">
-            <DatePicker type="datetime" v-model="editorProductionTask.deliveryData"></DatePicker>
+            <DatePicker type="date" v-model="editorProductionTask.deliveryData"></DatePicker>
           </FormItem>
           <FormItem label="总数量" prop="qty" style="margin-left: 8px;">
-            <Input v-model="editorProductionTask.qty"/>
+            <Input v-model="editorProductionTask.qty" disabled/>
           </FormItem>
           <FormItem label="计量单位" prop="unit" style="width:240px">
             <Select v-model="editorProductionTask.unit">
@@ -367,7 +367,7 @@
             </div>
           </template>
         </Table> 
-        <div style="margin-left: 528px;color:red;" v-if="isShow">不能超过总数量</div>
+        <div style="margin-left: 423px;color:red;" v-if="isShow">{{Prompt}}</div>
         <Spin ref="Aloadding"></Spin>
       </div>
 
@@ -484,7 +484,7 @@
             </Select>
           </FormItem>
           <FormItem label="合同交期" prop="detailDeliveryData" style="width:253px">
-            <DatePicker type="datetime" v-model="addOutgoing.detailDeliveryData"></DatePicker>
+            <DatePicker type="date" v-model="addOutgoing.detailDeliveryData"></DatePicker>
           </FormItem>
           <FormItem label="工序" prop="detailProcedures" style="min-width:287px">
             <Select v-model="addOutgoing.detailProcedures" multiple>
@@ -543,7 +543,7 @@
       </div>
       <div slot="footer">
         <Button @click="cancel">取消</Button>
-        <Button @click="okOutgoing" type="success">发送</Button>
+        <Button @click="okOutgoing()" type="success">发送</Button>
       </div>
     </Modal>
 
@@ -650,6 +650,9 @@ import {
   searlist
 } from "../../api/production/productionTask.js";
 import { parse } from "semver";
+import { mapActions } from 'vuex';
+
+
 export default {
   data() {
     const validatePass = (rule, value, callback) => {
@@ -667,6 +670,7 @@ export default {
       }
     };
     return {
+      Prompt:"",
       All:false,
       isShow:false,
       outgoingCertificatesListCb:[
@@ -1076,7 +1080,7 @@ export default {
         styleCode: "",
         pins: "",
         memo: "",
-        qty: 0,
+        qty: '',
         color: "",
         size: "",
         brand: "",
@@ -1115,7 +1119,7 @@ export default {
               props: {
                 row: params.row,
                 toView: this.toView
-              },
+              }
             });
           }
         },
@@ -1239,7 +1243,8 @@ export default {
           label: "藏青"
         }
       ],
-      tsaaa: []
+      tsaaa: [],
+      tsrow: {}
     };
   },
   components: {
@@ -1247,6 +1252,7 @@ export default {
     Spin
   },
   methods: {
+    ...mapActions(['runGetTableData']),
     //外发页面 全选
     optionsAll(state){
       let countI = []
@@ -1262,14 +1268,15 @@ export default {
     //新增 页面判断是否大于总数和
     countClik(e){
       let a = 0
-      this.certificatesListCb.forEach(val => {
+      this.certificatesListCb.forEach((val,index) => {
+        if(val.qty==""){
+          this.isShow = true
+        }else if(val.qty!=""){
+          this.isShow = false
+        }
         a += parseInt(val.qty)
       })
-     if(a>this.addProductionTask.qty){
-       this.isShow = true
-     }else{
-       this.isShow = false
-     }
+      this.addProductionTask.qty = a
     },
     //编辑 页面判断是否大于总数和
     eidCount(e){
@@ -1277,11 +1284,7 @@ export default {
       this.editCertificatesListCb.forEach(val => {
         a += parseInt(val.qty)
       })
-     if(a>this.editorProductionTask.qty){
-       this.isShow = true
-     }else{
-       this.isShow = false
-     }
+      this.editorProductionTask.qty = a
     },
     //外发 页面判断是否大于总数和
     sendCount(e){
@@ -1312,8 +1315,6 @@ export default {
     // },
     //添加页面表格 添加 小按钮
     handEditIndex(row,index){
-      // this.handleSave(index)
-      // this.handleEdit(row,index+1)
       this.certificatesList.push({
         bzQty: "",
         color: "",
@@ -1403,6 +1404,7 @@ export default {
     },
     //发送
     okOutgoing() {
+      this.isShow = false
       this.selectData = []
       if(this.selectAll[0] == -1){
          this.selectData = this.outgoingCertificatesListCb
@@ -1411,44 +1413,51 @@ export default {
           this.selectData.push(this.outgoingCertificatesListCb[val])
         })
       }
-      this.selectData.forEach(val => {
-        val.moCode = this.outgoingProductionTask.moCode;
-        val.moId = this.outgoingProductionTask.id;
-        val.cid = this.addOutgoing.cid;
-        val.detailDeliveryData = this.addOutgoing.detailDeliveryData;
-        val.detailProcedures = this.addOutgoing.detailProcedures;
-      });
-      this.outgoing = true;
-      this.$nextTick(() => {
-        this.outgoing = false;
-      });
-      this.outgoingProductionTask.procedures = this.outgoingProductionTask.procedures.join(",");
-      this.outgoingProductionTask.pid = this.outgoingProductionTask.id;
-      this.outgoingProductionTask.id="";
-      this.outgoingProductionTask.cid = this.selectData[0].cid
-      productionTasks(this.outgoingProductionTask).then(res => {
+      if(!this.isShow&&this.selectData.length!=0){
         this.selectData.forEach(val => {
-         if(typeof val.detailProcedures != "string"){
-           val.detailProcedures = val.detailProcedures.join(",");
-         }
-          val.cid = this.selectData[0].cid;
-          val.detailProcedures = this.selectData[0].detailProcedures;
-          val.detailDeliveryData = this.selectData[0].detailDeliveryData;
-          delete val.id;delete val.procedures;delete val.deliveryData;
-          this.outgoingProductionTask.qty += parseInt(val.qty);
           val.moCode = this.outgoingProductionTask.moCode;
-          val.moId = res.data.id;
-          AdddcMoDetail(val).then( res => {
-            this.searchBtn();
-          })
+          val.moId = this.outgoingProductionTask.id;
+          val.cid = this.addOutgoing.cid;
+          val.detailDeliveryData = this.addOutgoing.detailDeliveryData;
+          val.detailProcedures = this.addOutgoing.detailProcedures;
         });
-        // 尾部
-          // this.editInfo.jsonString = JSON.stringify(this.selectData);
-          // modityUpdate(this.editInfo).then(res => {
-          //   this.editInfo.ids=[];
-          //   this.searchBtn();
-          // });
-      });
+        this.outgoing = true;
+        this.$nextTick(() => {
+          this.outgoing = false;
+        });
+        this.outgoingProductionTask.procedures = this.outgoingProductionTask.procedures.join(",");
+        this.outgoingProductionTask.pid = this.outgoingProductionTask.id;
+        this.outgoingProductionTask.id="";
+        this.outgoingProductionTask.cid = this.selectData[0].cid
+        productionTasks(this.outgoingProductionTask).then(res => {
+          this.selectData.forEach(val => {
+          if(typeof val.detailProcedures != "string"){
+            val.detailProcedures = val.detailProcedures.join(",");
+          }
+            val.cid = this.selectData[0].cid;
+            val.detailProcedures = this.selectData[0].detailProcedures;
+            val.detailDeliveryData = this.selectData[0].detailDeliveryData;
+            delete val.id;delete val.procedures;delete val.deliveryData;
+            this.outgoingProductionTask.qty += parseInt(val.qty);
+            val.moCode = this.outgoingProductionTask.moCode;
+            val.moId = res.data.id;
+            AdddcMoDetail(val).then( res => {
+              // this.searchBtn();
+              this.runGetTableData(this.tsrow)
+            })
+          });
+          // 尾部
+            // this.editInfo.jsonString = JSON.stringify(this.selectData);
+            // modityUpdate(this.editInfo).then(res => {
+            //   this.editInfo.ids=[];
+            //   this.searchBtn();
+            // });
+        });
+    }else if(this.isShow){
+      this.$Message.error('不能超过总数量')
+     }else if(this.selectData.length==0){
+       this.$Message.error('发送任务不能为空')
+     }
     },
     // 查看
     toView(row) {
@@ -1481,6 +1490,7 @@ export default {
     },
     // 外发按钮
     outgoinghanldclick(row) {
+      this.tsrow = row;
       this.All = false
       this.selectIndex =  []
       this.$refs.outgoingAloadding.toggleSpin = true;
@@ -1560,11 +1570,7 @@ export default {
       this.certificatesListCb.forEach(val => {
         a += parseInt(val.qty)
       })
-      if(a>this.addProductionTask.qty){
-        this.isShow = true
-      }else{
-        this.isShow = false
-      }
+      this.addProductionTask.qty =  a
     },
     editHandleRemove(index,id) {
       if (id) {
@@ -1574,15 +1580,11 @@ export default {
         this.editCertificatesListCb.splice(index, 1);
         this.editCertificatesList.splice(index, 1);
       }
-       let a = 0
+      let a = 0
       this.editCertificatesListCb.forEach(val => {
         a += parseInt(val.qty)
       })
-     if(a>this.editorProductionTask.qty){
-       this.isShow = true
-     }else{
-       this.isShow = false
-     }
+      this.editorProductionTask.qty = a
     },
     outgoingHandleRemove(index, id) {
       if (id) {
@@ -1677,7 +1679,26 @@ export default {
         this.ed = true;
       });
       this.$refs["editorProductionRef"].validate(valid => {
-        if (valid) {
+        //判断尾部是否为空
+        this.editCertificatesListCb.forEach(val => {
+          if(val.qty=="" ){
+            this.Prompt = '内容不能为空'
+            this.isShow = true
+            this.$set(data,'isShow',true)
+          }else if(val.color ==""){
+            this.Prompt = '内容不能为空'
+            this.isShow = true
+            this.$set(data,'isShow',true)
+          }else if( val.size==""){
+            this.Prompt = '内容不能为空'
+            this.isShow = true
+            this.$set(data,'isShow',true)
+          }
+          else{
+            this.isShow = false
+          }
+        })
+        if (valid && !this.isShow) {
           this.editorProductionTask.procedures = this.editorProductionTask.procedures.join(",")
           productionTaskEdit(this.editorProductionTask).then(res => {
             this.editCertificatesListCb.forEach(val => {
@@ -1758,7 +1779,26 @@ export default {
         this.add = true;
       });
       this.$refs["productionRef"].validate(valid => {
-        if (valid) {
+        //判断尾部是否为空
+        this.certificatesListCb.forEach(val => {
+          if(val.qty=="" ){
+            this.Prompt = '内容不能为空'
+            this.isShow = true
+            this.$set(data,'isShow',true)
+          }else if(val.color ==""){
+            this.Prompt = '内容不能为空'
+            this.isShow = true
+            this.$set(data,'isShow',true)
+          }else if( val.size==""){
+            this.Prompt = '内容不能为空'
+            this.isShow = true
+            this.$set(data,'isShow',true)
+          }
+          else{
+            this.isShow = false
+          }
+        })
+        if (valid && !this.isShow) {
           this.addProductionTask.procedures = this.addProductionTask.procedures.join(',')
           productionTasks(this.addProductionTask).then(res => {
             this.dataTable = res.content;
