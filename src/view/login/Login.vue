@@ -166,6 +166,7 @@ export default {
         const validateEmail = (rule, value, callback) => {
             usernameValidate({username:value}).then(res => {
                 if(res.data){
+                    this.isEmailregister = res.data;
                     callback()
                 }else{
                     callback(new Error('该邮箱已注册'));
@@ -246,6 +247,7 @@ export default {
         }
         return {
             loading: false,
+            isEmailregister: false,
             loginForm: {
                 username: "",
                 password: "",
@@ -292,11 +294,11 @@ export default {
             ruleRegister: {
                 username: [
                     { required: true, message: '请输入手机号', trigger: 'blur' },
-                    { validator: validatePhone, trigger: "change" }
+                    { validator: validatePhone, trigger: "blur" }
                 ],
                 password: [
                     { required: true, message: '请输入密码', trigger: 'blur' },
-                    { validator:validatePassword, trigger: 'change' }
+                    { validator:validatePassword, trigger: 'blur' }
                 ],
                 confirmPwd: [
                     { required: true, message: '请确认密码', trigger: 'blur' },
@@ -321,14 +323,14 @@ export default {
                 username: [
                     { required: true, message: '请输入邮箱', trigger: 'blur' },
                     { type: 'email', message: '请输入正确的邮箱', trigger: 'blur' },
-                    { validator: validateEmail, trigger: "change" }
+                    { validator: validateEmail, trigger: "blur" }
                 ],
                 password: [
-                    { required: true, message: '请输入密码', trigger: 'change' },
-                    { validator:validateEmialPassword, trigger: 'change' }
+                    { required: true, message: '请输入密码', trigger: 'blur' },
+                    { validator:validateEmialPassword, trigger: 'blur' }
                 ],
                 confirmPwd: [
-                    { required: true, message: '请确认密码', trigger: 'change' },
+                    { required: true, message: '请确认密码', trigger: 'blur' },
                     { validator:validateEmailRePwd, trigger: 'blur' }
                 ],
                 emailCode: [
@@ -511,10 +513,9 @@ export default {
             this.$refs['registerEmail'].validateField('username', err => {
                 propEmail = err;
             });
-            if (!propEmail) {
+            if (!propEmail && this.isEmailregister) {
                 emailVerification(getEmailCode).then(res => {
                     if (res.code === 200) {
-                        console.log(this.email)
                         if (this.email) {
                             let emailTotalTime = 60;
                             this.isEamilBtnState = true;
